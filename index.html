@@ -43,7 +43,7 @@
     position: relative;
     text-align: center;
     padding: 72px 24px 60px;
-    overflow: hidden;
+    overflow: visible;
     background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(123,94,167,0.18) 0%, transparent 70%),
                 radial-gradient(ellipse 40% 30% at 50% 100%, rgba(201,168,76,0.08) 0%, transparent 60%),
                 var(--ink);
@@ -108,6 +108,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    pointer-events: none; 
   }
 
   .loop-ring.meta {
@@ -675,7 +676,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 9999;
     background: rgba(8,9,18,0.92);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
