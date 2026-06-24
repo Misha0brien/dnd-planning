@@ -756,7 +756,7 @@
   <h1>The Game Loop Framework</h1>
   <p class="hero-sub">A structured approach to designing mechanically coherent and emotionally resonant D&amp;D campaigns.</p>
 
-  <div class="loop-diagram">
+  <div class="loop-diagram" onclick="openLoopModal()" title="Click to expand" style="cursor:zoom-in;position:relative;">
     <div class="diagram-placeholder">
       <div class="loop-ring meta" style="top:0;left:0;position:absolute;">
         <div class="loop-ring progress" style="position:relative;">
@@ -782,6 +782,7 @@
         <div class="legend-text">Core Loops<span class="legend-sub">Session-scale activities</span></div>
       </div>
     </div>
+    <span style="position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.12em;color:var(--gold-dim);opacity:0.7;">⤢ expand</span>
   </div>
 
   <nav class="step-nav">
@@ -1516,6 +1517,75 @@
 </footer>
 
 <script>
+  /* ── HERO LOOP DIAGRAM MODAL ── */
+  function openLoopModal() {
+    document.getElementById('flow-modal-title').textContent = 'The Three Nested Loops';
+    document.getElementById('flow-modal-content').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:16px 0;">
+        <svg viewBox="0 0 420 420" width="380" height="380" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+          <defs>
+            <radialGradient id="mg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(123,94,167,0.12)"/>
+              <stop offset="100%" stop-color="rgba(123,94,167,0)"/>
+            </radialGradient>
+            <radialGradient id="pg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(46,125,107,0.14)"/>
+              <stop offset="100%" stop-color="rgba(46,125,107,0)"/>
+            </radialGradient>
+            <radialGradient id="cg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(139,94,60,0.18)"/>
+              <stop offset="100%" stop-color="rgba(139,94,60,0)"/>
+            </radialGradient>
+          </defs>
+          <!-- Meta ring -->
+          <circle cx="210" cy="210" r="190" fill="url(#mg)" stroke="rgba(123,94,167,0.75)" stroke-width="2"/>
+          <!-- Progress ring -->
+          <circle cx="210" cy="210" r="130" fill="url(#pg)" stroke="rgba(46,125,107,0.75)" stroke-width="2"/>
+          <!-- Core ring -->
+          <circle cx="210" cy="210" r="70" fill="url(#cg)" stroke="rgba(139,94,60,0.85)" stroke-width="2"/>
+
+          <!-- Meta label -->
+          <text x="210" y="36" text-anchor="middle" font-family="Cinzel, serif" font-size="13" letter-spacing="3" fill="rgba(176,142,212,0.95)" font-weight="600">META LOOP</text>
+          <text x="210" y="52" text-anchor="middle" font-family="Crimson Pro, serif" font-size="11" fill="rgba(139,146,184,0.8)" font-style="italic">Campaign-scale emotional investment</text>
+
+          <!-- Progress label -->
+          <text x="210" y="100" text-anchor="middle" font-family="Cinzel, serif" font-size="11" letter-spacing="2" fill="rgba(111,199,173,0.9)" font-weight="600">PROGRESS LOOPS</text>
+          <text x="210" y="115" text-anchor="middle" font-family="Crimson Pro, serif" font-size="10" fill="rgba(139,146,184,0.75)" font-style="italic">Arc-scale advancement tracks</text>
+
+          <!-- Core label -->
+          <text x="210" y="197" text-anchor="middle" font-family="Cinzel, serif" font-size="10" letter-spacing="1.5" fill="rgba(201,155,110,0.95)" font-weight="600">CORE LOOPS</text>
+          <text x="210" y="212" text-anchor="middle" font-family="Crimson Pro, serif" font-size="9" fill="rgba(139,146,184,0.75)" font-style="italic">Session-scale activities</text>
+
+          <!-- Scope labels on right side -->
+          <line x1="400" y1="210" x2="370" y2="210" stroke="rgba(123,94,167,0.4)" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="405" y="214" font-family="Cinzel, serif" font-size="9" fill="rgba(176,142,212,0.7)" letter-spacing="1">Entire campaign</text>
+
+          <line x1="340" y1="150" x2="320" y2="170" stroke="rgba(46,125,107,0.4)" stroke-width="1" stroke-dasharray="3,2"/>
+
+          <!-- Design order arrow -->
+          <text x="210" y="390" text-anchor="middle" font-family="Cinzel, serif" font-size="10" letter-spacing="2" fill="rgba(201,168,76,0.6)">DESIGN OUTSIDE → IN</text>
+        </svg>
+
+        <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:420px;">
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;background:rgba(123,94,167,0.07);border:1px solid rgba(123,94,167,0.3);border-radius:4px;">
+            <div style="width:12px;height:12px;border-radius:50%;border:2px solid #7B5EA7;background:rgba(123,94,167,0.2);flex-shrink:0;margin-top:3px;"></div>
+            <div><div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.1em;color:#B08ED4;margin-bottom:4px;">META LOOP — Entire Campaign</div><div style="font-size:14px;color:var(--mist);">Why do players invest in the outcome? Defines the central conflict, antagonist chain, and terminal states.</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;background:rgba(46,125,107,0.07);border:1px solid rgba(46,125,107,0.3);border-radius:4px;">
+            <div style="width:12px;height:12px;border-radius:50%;border:2px solid #2E7D6B;background:rgba(46,125,107,0.2);flex-shrink:0;margin-top:3px;"></div>
+            <div><div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.1em;color:#6FC7AD;margin-bottom:4px;">PROGRESS LOOPS — Multi-Session Arcs</div><div style="font-size:14px;color:var(--mist);">How do players perceive advancement? 2–4 parallel tracks rewarding different play styles.</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;background:rgba(139,94,60,0.07);border:1px solid rgba(139,94,60,0.3);border-radius:4px;">
+            <div style="width:12px;height:12px;border-radius:50%;border:2px solid #8B5E3C;background:rgba(139,94,60,0.2);flex-shrink:0;margin-top:3px;"></div>
+            <div><div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.1em;color:#C99B6E;margin-bottom:4px;">CORE LOOPS — Individual Sessions</div><div style="font-size:14px;color:var(--mist);">What activities structure each session? 5–7 repeating activity types, each feeding a Progress Loop.</div></div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('flow-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
   /* ── LOOP SELECTOR ── */
   function selectLoop(card) {
     document.querySelectorAll('.loop-card').forEach(c => c.classList.remove('active'));
