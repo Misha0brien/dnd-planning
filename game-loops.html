@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Game Loop Framework — Tabletop RPG Campaign Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #0D0F1A;
+    --deep:      #131525;
+    --slate:     #1C1F35;
+    --panel:     #22263D;
+    --border:    #2E3356;
+    --gold:      #C9A84C;
+    --gold-dim:  #8A6B2A;
+    --gold-glow: rgba(201,168,76,0.18);
+    --amber:     #E8C46A;
+    --crimson:   #8B2635;
+    --mist:      #8B92B8;
+    --pale:      #C8CCDF;
+    --white:     #EEF0F8;
+    --meta-col:  #7B5EA7;
+    --prog-col:  #2E7D6B;
+    --core-col:  #8B5E3C;
+      }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--ink);
+    color: var(--pale);
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── SITE NAV ── */
+  .site-nav {
+    background: var(--deep);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .site-nav-home {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    padding: 14px 0;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+  .site-nav-home:hover { opacity: 1; }
+  .site-nav-links { display: flex; }
+  .site-nav-link {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mist);
+    text-decoration: none;
+    padding: 14px 18px;
+    border-left: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s;
+  }
+  .site-nav-link:hover { color: var(--gold); background: var(--gold-glow); }
+  .site-nav-link.current { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: 72px 24px 60px;
+    overflow: visible;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(123,94,167,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 50% 100%, rgba(201,168,76,0.08) 0%, transparent 60%),
+                var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(201,168,76,0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(123,94,167,0.06) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.15;
+    max-width: 800px;
+    margin: 0 auto 18px;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--mist);
+    max-width: 540px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+  }
+
+  /* ── NESTED LOOP DIAGRAM ── */
+  .loop-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 56px;
+    position: relative;
+  }
+
+  .loop-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    pointer-events: none; 
+  }
+
+  .loop-ring.meta {
+    width: 260px; height: 260px;
+    border-color: rgba(123,94,167,0.7);
+    background: radial-gradient(circle, rgba(123,94,167,0.06) 0%, transparent 70%);
+    animation: pulseRing 4s ease-in-out infinite;
+  }
+  .loop-ring.progress {
+    width: 185px; height: 185px;
+    border-color: rgba(46,125,107,0.7);
+    background: radial-gradient(circle, rgba(46,125,107,0.08) 0%, transparent 70%);
+    animation: pulseRing 4s ease-in-out infinite 0.8s;
+  }
+  .loop-ring.core {
+    width: 110px; height: 110px;
+    border-color: rgba(139,94,60,0.8);
+    background: radial-gradient(circle, rgba(139,94,60,0.12) 0%, transparent 70%);
+    animation: pulseRing 4s ease-in-out infinite 1.6s;
+  }
+
+  @keyframes pulseRing {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.025); }
+  }
+
+  .diagram-placeholder {
+    width: 260px;
+    height: 260px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .ring-label {
+    position: absolute;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .ring-label.meta   { top: 12px; left: 50%; transform: translateX(-50%); color: rgba(180,150,220,0.9); }
+  .ring-label.prog   { top: 50px; left: 50%; transform: translateX(-50%); color: rgba(100,195,170,0.9); }
+
+  .diagram-legend {
+    margin-left: 48px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .legend-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid;
+    flex-shrink: 0;
+  }
+
+  .legend-item.meta .legend-dot  { border-color: #7B5EA7; background: rgba(123,94,167,0.2); }
+  .legend-item.prog .legend-dot  { border-color: #2E7D6B; background: rgba(46,125,107,0.2); }
+  .legend-item.core .legend-dot  { border-color: #8B5E3C; background: rgba(139,94,60,0.2); }
+  .legend-item.meta .legend-text { color: #B08ED4; }
+  .legend-item.prog .legend-text { color: #6FC7AD; }
+  .legend-item.core .legend-text { color: #C99B6E; }
+  .legend-sub { font-size: 10px; color: var(--mist); font-family: 'Crimson Pro', serif; font-style: italic; letter-spacing: 0; display: block; }
+
+  /* ── NAV ── */
+  .step-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 24px 0;
+  }
+
+  .nav-pill {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--mist);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-pill:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow); }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .section {
+    margin: 48px 0;
+  }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step-card:hover { border-color: var(--gold-dim); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .step-header::-webkit-details-marker { display: none; }
+
+  .step-number {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    flex-shrink: 0;
+    width: 52px;
+  }
+
+  .step-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    flex: 1;
+    letter-spacing: 0.04em;
+  }
+
+  .step-chevron {
+    font-size: 12px;
+    color: var(--mist);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  details[open] .step-chevron { transform: rotate(90deg); }
+  details[open] > .step-header { border-bottom: 1px solid var(--border); }
+
+  .step-body {
+    padding: 28px 24px 28px 92px;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    margin: 28px 0 12px;
+  }
+
+  h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin: 20px 0 8px;
+  }
+
+  p { margin-bottom: 14px; }
+  strong { color: var(--white); font-weight: 600; }
+  em { color: var(--mist); }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  th {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(201,168,76,0.05);
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(46,51,86,0.5);
+    font-size: 15px;
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── LOOP BADGES ── */
+  .badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 3px;
+    vertical-align: middle;
+  }
+  .badge.meta  { background: rgba(123,94,167,0.2); color: #B08ED4; border: 1px solid rgba(123,94,167,0.4); }
+  .badge.prog  { background: rgba(46,125,107,0.2); color: #6FC7AD; border: 1px solid rgba(46,125,107,0.4); }
+  .badge.core  { background: rgba(139,94,60,0.2);  color: #C99B6E; border: 1px solid rgba(139,94,60,0.4); }
+
+  /* ── FLOWCHARTS ── */
+  .flow-wrap {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px 24px 24px 24px;
+    margin: 16px 0;
+    overflow-x: auto;
+    cursor: zoom-in;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .flow-wrap:hover {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 1px rgba(201,168,76,0.12);
+  }
+
+  /* Expand hint badge */
+  .flow-wrap::after {
+    content: '⤢ expand';
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--gold-dim);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .flow-wrap:hover::after { opacity: 1; }
+
+  .flow-node {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--pale);
+    display: inline-block;
+    margin: 4px 0;
+    white-space: nowrap;
+  }
+  .flow-node.trigger { border-color: var(--gold-dim); color: var(--amber); background: rgba(201,168,76,0.06); }
+  .flow-node.outcome-good { border-color: rgba(46,125,107,0.6); color: #6FC7AD; background: rgba(46,125,107,0.06); }
+  .flow-node.outcome-bad  { border-color: rgba(139,38,53,0.6);  color: #D47A85; background: rgba(139,38,53,0.06); }
+
+  /* ── LOOP-BACK NODE ── */
+  .flow-node.loop-back {
+    border-color: rgba(201,168,76,0.45);
+    color: var(--gold);
+    background: rgba(201,168,76,0.07);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    animation: loopPulse 3s ease-in-out infinite;
+  }
+  @keyframes loopPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+    50%       { box-shadow: 0 0 8px 2px rgba(201,168,76,0.18); }
+  }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-left: 3px solid var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 3px 3px 0;
+  }
+  .callout-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .callout p { margin-bottom: 8px; font-size: 15px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout.example {
+    border-color: rgba(123,94,167,0.6);
+    background: rgba(123,94,167,0.05);
+  }
+  .callout.example .callout-label { color: #B08ED4; }
+
+  .callout.warning {
+    border-color: rgba(139,94,60,0.7);
+    background: rgba(139,94,60,0.05);
+  }
+  .callout.warning .callout-label { color: #C99B6E; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; margin: 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(46,51,86,0.4);
+    font-size: 15px;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li.checked { color: var(--mist); text-decoration: line-through; text-decoration-color: var(--gold-dim); }
+
+  .check-box {
+    width: 18px; height: 18px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: var(--deep);
+  }
+  .checked .check-box {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold-dim);
+  }
+  .check-mark { font-size: 11px; color: var(--gold); display: none; }
+  .checked .check-mark { display: block; }
+
+  .checklist-section { margin-bottom: 28px; }
+  .checklist-section h4 { margin-top: 0; }
+
+  /* ── CORE LOOP GRID ── */
+  .loop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .loop-card {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .loop-card:hover { border-color: var(--gold-dim); background: var(--panel); }
+  .loop-card.active { border-color: var(--gold); background: var(--panel); }
+
+  .loop-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+  .loop-card-desc {
+    font-size: 13px;
+    color: var(--mist);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .loop-detail { display: none; margin-top: 16px; }
+  .loop-detail.active { display: block; }
+
+  /* ── PROGRESS LOOP TRACKS ── */
+  .progress-tracks {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  @media (max-width: 600px) {
+    .progress-tracks { grid-template-columns: 1fr; }
+    .loop-grid { grid-template-columns: 1fr; }
+    .step-body { padding: 20px 16px; }
+    .diagram-legend { display: none; }
+    h1 { font-size: 26px; }
+  }
+
+  .track-card {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+  }
+  .track-name {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .track-card:nth-child(1) .track-name { color: #6FC7AD; }
+  .track-card:nth-child(2) .track-name { color: #B08ED4; }
+  .track-card:nth-child(3) .track-name { color: #D47A85; }
+  .track-card:nth-child(4) .track-name { color: var(--amber); }
+
+  .track-steps { display: flex; flex-direction: column; gap: 6px; }
+  .track-step {
+    font-size: 13px;
+    color: var(--mist);
+    padding: 5px 10px;
+    background: var(--panel);
+    border-radius: 2px;
+    border-left: 2px solid var(--border);
+  }
+
+  /* ── WIRING TABLE ── */
+  .wiring-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    margin: 2px 2px 2px 0;
+    background: rgba(46,125,107,0.15);
+    color: #6FC7AD;
+    border: 1px solid rgba(46,125,107,0.3);
+  }
+
+  /* ── THEORY SECTION ── */
+  .theory-block {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin: 0 0 40px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+    position: relative;
+  }
+  .divider::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--ink);
+    padding: 0 12px;
+    color: var(--gold-dim);
+    font-size: 10px;
+  }
+
+  /* ── ATTRIBUTION ── */
+  .attribution {
+    text-align: center;
+    padding: 40px 24px 60px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  .attribution p { font-size: 14px; color: var(--mist); margin-bottom: 8px; }
+  .attribution a { color: var(--gold-dim); text-decoration: none; }
+  .attribution a:hover { color: var(--gold); }
+
+  /* ── TERMINAL STATES ── */
+  .terminal-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  @media (max-width: 540px) { .terminal-pair { grid-template-columns: 1fr; } }
+
+  .terminal-card {
+    padding: 16px 18px;
+    border-radius: 4px;
+    border: 1px solid;
+  }
+  .terminal-card.success { border-color: rgba(46,125,107,0.5); background: rgba(46,125,107,0.07); }
+  .terminal-card.failure { border-color: rgba(139,38,53,0.5); background: rgba(139,38,53,0.07); }
+  .terminal-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .success .terminal-label { color: #6FC7AD; }
+  .failure .terminal-label { color: #D47A85; }
+  .terminal-card p { font-size: 14px; margin: 0; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar-outer {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    height: 6px;
+    margin: 6px 0 14px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    transition: width 0.4s ease;
+  }
+
+  /* ══════════════════════════════════════
+     LIGHTBOX MODAL
+  ══════════════════════════════════════ */
+  #flow-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(8,9,18,0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    cursor: zoom-out;
+  }
+  #flow-modal.open { display: flex; }
+
+  #flow-modal-inner {
+    background: var(--deep);
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    padding: 36px 40px 40px;
+    max-width: 760px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    cursor: default;
+    position: relative;
+    box-shadow: 0 0 60px rgba(201,168,76,0.12), 0 0 0 1px rgba(201,168,76,0.08);
+    animation: modalIn 0.2s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  #flow-modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  #flow-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--mist);
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 4px 10px;
+    transition: all 0.15s;
+  }
+  #flow-modal-close:hover { color: var(--gold); border-color: var(--gold-dim); background: var(--gold-glow); }
+
+  #flow-modal-content .flow-node { font-size: 15px; padding: 10px 20px; }
+
+</style>
+</head>
+<body>
+
+<!-- ══ SITE NAV ══ -->
+<nav class="site-nav">
+  <a class="site-nav-home" href="index.html">D&amp;D Campaign Design</a>
+  <div class="site-nav-links">
+    <a class="site-nav-link current" href="game-loops.html">Game Loops</a>
+    <a class="site-nav-link" href="player-types.html">Player Types</a>
+  </div>
+</nav>
+
+<!-- ══ LIGHTBOX MODAL ══ -->
+<div id="flow-modal" onclick="closeModal(event)">
+  <div id="flow-modal-inner">
+    <div id="flow-modal-title"></div>
+    <button id="flow-modal-close" onclick="closeModalDirect()">✕ close</button>
+    <div id="flow-modal-content"></div>
+  </div>
+</div>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <p class="eyebrow">Tabletop RPG Design Methodology</p>
+  <h1>The Game Loop Framework</h1>
+  <p class="hero-sub">A structured approach to designing mechanically coherent and emotionally resonant D&amp;D campaigns.</p>
+
+  <div class="loop-diagram" onclick="openLoopModal()" title="Click to expand" style="cursor:zoom-in;position:relative;">
+    <div class="diagram-placeholder">
+      <div class="loop-ring meta" style="top:0;left:0;position:absolute;">
+        <div class="loop-ring progress" style="position:relative;">
+          <div class="loop-ring core" style="position:relative;">
+            <span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.1em;color:rgba(220,170,120,0.9);text-transform:uppercase;">Core</span>
+          </div>
+        </div>
+      </div>
+      <span class="ring-label meta">Meta Loop</span>
+      <span class="ring-label prog" style="top:42px;">Progress</span>
+    </div>
+    <div class="diagram-legend">
+      <div class="legend-item meta">
+        <div class="legend-dot"></div>
+        <div class="legend-text">Meta Loop<span class="legend-sub">Campaign-scale meaning</span></div>
+      </div>
+      <div class="legend-item prog">
+        <div class="legend-dot"></div>
+        <div class="legend-text">Progress Loops<span class="legend-sub">Arc-scale advancement</span></div>
+      </div>
+      <div class="legend-item core">
+        <div class="legend-dot"></div>
+        <div class="legend-text">Core Loops<span class="legend-sub">Session-scale activities</span></div>
+      </div>
+    </div>
+    <span style="position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.12em;color:var(--gold-dim);opacity:0.7;">⤢ expand</span>
+  </div>
+
+  <nav class="step-nav">
+    <a class="nav-pill" href="#theory">Foundation</a>
+    <a class="nav-pill" href="#step1">Setting</a>
+    <a class="nav-pill" href="#step2">Meta Loop</a>
+    <a class="nav-pill" href="#step3">Progress Loops</a>
+    <a class="nav-pill" href="#step4">Core Loops</a>
+    <a class="nav-pill" href="#step5">Wiring</a>
+    <a class="nav-pill" href="#step6">Entry Hooks</a>
+    <a class="nav-pill" href="#step7">Checklist</a>
+  </nav>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="container">
+
+  <!-- Theory -->
+  <section class="section" id="theory">
+    <div class="theory-block">
+      <h2>Theoretical Foundation</h2>
+      <p>Game loop theory, originating in video game design, describes the repeating cycles of action and reward that sustain player engagement over time. A well-constructed game presents players with <strong>layered loops operating at different timescales</strong>: immediate moment-to-moment decisions nested inside session-level goals, which are in turn nested inside campaign-spanning stakes.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Loop</th>
+              <th>Central Design Question</th>
+              <th>Scope</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge meta">Meta</span></td>
+              <td>Why do players invest in the outcome?</td>
+              <td>Entire campaign</td>
+            </tr>
+            <tr>
+              <td><span class="badge prog">Progress</span></td>
+              <td>How do players perceive advancement between sessions?</td>
+              <td>Multi-session arcs</td>
+            </tr>
+            <tr>
+              <td><span class="badge core">Core</span></td>
+              <td>What repeated activities structure individual sessions?</td>
+              <td>Session / scene</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warning" style="margin-top:20px;">
+        <div class="callout-label">⚔ Design Order</div>
+        <p><strong>Design proceeds from the outside in:</strong> Meta Loop first, then Progress Loops, then Core Loops. Reversing this order produces campaigns where activity is abundant but stakes are unclear — or where stakes are defined but unsupported by session content.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 1 -->
+  <section class="section" id="step1">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Step 01</span>
+        <span class="step-title">Establish Setting Tone &amp; Inspirational Sources</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Before any loop design begins, establish the campaign's <strong>aesthetic and emotional register</strong>. This functions as a constraint set — all subsequent design decisions should be legible within it.</p>
+
+        <h3>Procedure</h3>
+        <ol style="padding-left:20px;display:flex;flex-direction:column;gap:10px;font-size:16px;">
+          <li>Compile <strong>5–10 reference works</strong> — fiction, film, games, mythology — that collectively define the intended tone. They don't need to share a genre; they should share a <em>feel</em>.</li>
+          <li>Write a <strong>2–3 sentence campaign premise</strong> that names the central conflict and the players' relationship to it.</li>
+          <li>Identify the <strong>dominant emotional mode</strong>: triumph, tragedy, dread, wonder, moral ambiguity, etc.</li>
+        </ol>
+
+        <h3>Diagnostic Questions</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>What does daily life feel like in this world for an ordinary person?</li>
+          <li>What distinguishes this setting from a generic high-fantasy baseline?</li>
+          <li>What types of scenes and conflicts will recur? Do the reference works support this?</li>
+        </ul>
+
+        <div class="callout example" style="margin-top:24px;">
+          <div class="callout-label">✦ Example — Mythic Odyssey Campaign</div>
+          <p><strong>Reference works:</strong> Greek &amp; World Mythology, Hercules, The Odyssey, Sinbad, Percy Jackson, Monster Hunter, Nausicaä of the Valley of the Wind.</p>
+          <p><strong>Premise:</strong> Mythic heroes, marked by prophecy, must navigate a world in which the gods are active participants and the Titans threaten to unmake civilization. Glory is earned; fate is contested.</p>
+          <p><strong>Emotional register:</strong> Epic — heroic sacrifice, divine favor, and the weight of destiny.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Step 2 -->
+  <section class="section" id="step2" style="margin-top:-36px;">
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">Step 02</span>
+        <span class="step-title">Construct the Meta Loop <span class="badge meta" style="margin-left:8px;">Campaign Scale</span></span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>The Meta Loop is the campaign's <strong>primary structure of meaning</strong>. It answers the question every player implicitly asks across every session: <em>why does this matter, and what is at stake if we fail?</em></p>
+        <p>A complete Meta Loop has three required components.</p>
+
+        <h3>2a — The Inciting Hook</h3>
+        <p>The hook is the narrative and mechanical reason these particular characters are involved in this particular conflict. It must establish <strong>personal stakes</strong> — the players must stand to lose something specific, not merely witness generic peril.</p>
+
+        <div class="callout">
+          <div class="callout-label">Key Distinction</div>
+          <p><strong>The hook is not the premise.</strong> The premise explains what the world is; the hook explains why the players' characters cannot ignore it.</p>
+        </div>
+
+        <h4>Structural Requirements</h4>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:15px;">
+          <li>Addresses why <em>these</em> characters are implicated, rather than any available adventurers</li>
+          <li>Establishes what the characters stand to lose through inaction</li>
+          <li>Creates an initial relationship between the party and the central conflict</li>
+        </ul>
+
+        <h3>2b — The Antagonist's Escalation Chain</h3>
+        <p>The antagonist must be actively pursuing a goal, representable as a <strong>linear chain of escalating steps</strong> — each of which is a potential intervention point for the players.</p>
+
+        <div class="flow-wrap" data-title="Antagonist's Escalation Chain" onclick="openModal(this)">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <div class="flow-node trigger">Hook / Inciting Condition</div>
+            <div style="color:var(--gold-dim);font-size:18px;">↓</div>
+            <div class="flow-node">Antagonist's First Objective</div>
+            <div style="color:var(--gold-dim);font-size:18px;">↓</div>
+            <div class="flow-node">Antagonist's Second Objective</div>
+            <div style="color:var(--gold-dim);font-size:18px;">↓</div>
+            <div class="flow-node">Antagonist's Final Action</div>
+            <div style="display:flex;gap:48px;margin-top:6px;">
+              <div style="color:var(--gold-dim);font-size:18px;">↙</div>
+              <div style="color:var(--gold-dim);font-size:18px;">↘</div>
+            </div>
+            <div style="display:flex;gap:16px;">
+              <div class="flow-node outcome-bad">Failure Outcome</div>
+              <div class="flow-node outcome-good">Success Outcome</div>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:15px;color:var(--mist);">Each node represents a stage of the threat. Player action can interrupt, accelerate, or redirect the chain. The chain also functions as a <strong style="color:var(--pale);">pacing mechanism</strong>: the campaign advances when the antagonist advances.</p>
+
+        <h3>2c — Branching Terminal States</h3>
+        <p>Define at minimum <strong>two distinct possible endings</strong>. Terminal states should be concrete and world-level — not abstract moral terms.</p>
+
+        <div class="terminal-pair">
+          <div class="terminal-card failure">
+            <div class="terminal-label">✗ Failure State</div>
+            <p>What the world becomes if the antagonist succeeds. Described from the perspective of ordinary people in the world.</p>
+          </div>
+          <div class="terminal-card success">
+            <div class="terminal-label">✓ Success State</div>
+            <p>What the players can achieve by stopping them. Specific, world-level consequences — achievable through multiple approaches if possible.</p>
+          </div>
+        </div>
+
+        <div class="callout example" style="margin-top:20px;">
+          <div class="callout-label">✦ Example — Mythic Odyssey Meta Loop</div>
+          <p><strong>Hook:</strong> A prophecy designates the player characters as the Chosen Ones whose actions will determine Thylea's fate. Inaction is not neutral — the prophecy will be fulfilled with or without their participation.</p>
+          <p><strong>Escalation Chain:</strong> Prophecy activates → God seeks ritual method → God acquires components → God executes ritual, freeing the Titans.</p>
+          <p><strong>Terminal States:</strong> <em style="color:#D47A85;">Thylea Destroyed</em> (failure) / <em style="color:#6FC7AD;">Thylea Saved</em> (success).</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Step 3 -->
+  <section class="section" id="step3" style="margin-top:-36px;">
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">Step 03</span>
+        <span class="step-title">Design Progress Loops <span class="badge prog" style="margin-left:8px;">Arc Scale</span></span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Progress Loops are the mid-level systems through which players perceive meaningful advancement between sessions. Without them, sessions exist in narrative isolation — events occur but accumulate no structural significance.</p>
+
+        <h3>Design Principles</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0;">
+          <div style="background:var(--deep);border:1px solid var(--border);border-radius:4px;padding:14px 16px;">
+            <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.12em;color:var(--gold);margin-bottom:8px;">MULTIPLICITY</div>
+            <p style="font-size:14px;color:var(--mist);">Sustain 2–4 simultaneous loops. Different players orient toward different tracks.</p>
+          </div>
+          <div style="background:var(--deep);border:1px solid var(--border);border-radius:4px;padding:14px 16px;">
+            <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.12em;color:var(--gold);margin-bottom:8px;">VISIBILITY</div>
+            <p style="font-size:14px;color:var(--mist);">Players must observe their standing. An invisible loop produces no motivational effect.</p>
+          </div>
+          <div style="background:var(--deep);border:1px solid var(--border);border-radius:4px;padding:14px 16px;">
+            <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.12em;color:var(--gold);margin-bottom:8px;">DIFFERENTIATION</div>
+            <p style="font-size:14px;color:var(--mist);">Loops should reward distinct modes of play — not all combat, not all social.</p>
+          </div>
+        </div>
+
+        <h3>Loop Structure</h3>
+        <div class="flow-wrap" data-title="Progress Loop Structure" onclick="openModal(this)">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <div class="flow-node trigger">Trigger Condition</div>
+            <div style="color:var(--gold-dim);font-size:18px;">↓</div>
+            <div class="flow-node">Player Action</div>
+            <div style="color:var(--gold-dim);font-size:18px;">↓</div>
+            <div class="flow-node outcome-good">Reward / Advancement</div>
+            <div style="color:var(--gold-dim);font-size:18px;">↓</div>
+            <div class="flow-node">New Opportunity Unlocked</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node loop-back">↺ Loop Repeats</div>
+          </div>
+        </div>
+
+        <h3>Standard Templates</h3>
+        <div class="progress-tracks">
+          <div class="track-card">
+            <div class="track-name">Experience / Leveling</div>
+            <div class="track-steps">
+              <div class="track-step">Overcome challenge</div>
+              <div class="track-step">↓ Gain XP</div>
+              <div class="track-step">↓ Level up</div>
+              <div class="track-step" style="border-left-color:var(--gold-dim);color:var(--gold);">↺ Face greater challenges</div>
+            </div>
+          </div>
+          <div class="track-card">
+            <div class="track-name">Renown / Reputation</div>
+            <div class="track-steps">
+              <div class="track-step">Perform notable deed</div>
+              <div class="track-step">↓ Gain renown with faction</div>
+              <div class="track-step">↓ Unlock titles, allies, quests</div>
+              <div class="track-step" style="border-left-color:var(--gold-dim);color:var(--gold);">↺ Loop repeats</div>
+            </div>
+          </div>
+          <div class="track-card">
+            <div class="track-name">Divine / Ideological Alignment</div>
+            <div class="track-steps">
+              <div class="track-step">Act in accordance with god/faction</div>
+              <div class="track-step">↓ Earn standing / points</div>
+              <div class="track-step">↓ Spend for boons, information</div>
+              <div class="track-step" style="border-left-color:var(--gold-dim);color:var(--gold);">↺ Loop repeats</div>
+            </div>
+          </div>
+          <div class="track-card">
+            <div class="track-name">Character Arc (Personal)</div>
+            <div class="track-steps">
+              <div class="track-step">Engage backstory element</div>
+              <div class="track-step">↓ Advance personal goal</div>
+              <div class="track-step">↓ Narrative milestone</div>
+              <div class="track-step" style="border-left-color:var(--gold-dim);color:var(--gold);">↺ New arc opens</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout example">
+          <div class="callout-label">✦ Example — Mythic Odyssey Progress Loops</div>
+          <p>Four parallel loops covering the primary motivational profiles of most player types:</p>
+          <div class="table-wrap">
+            <table style="margin-top:10px;">
+              <thead><tr><th>Loop</th><th>Motivational Profile</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Leveling</strong></td><td>Combat proficiency</td></tr>
+                <tr><td><strong>Piety System</strong></td><td>Moral-ideological alignment</td></tr>
+                <tr><td><strong>Renown System</strong></td><td>Narrative heroism</td></tr>
+                <tr><td><strong>Monster Arc</strong></td><td>Investigative persistence</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Step 4 -->
+  <section class="section" id="step4" style="margin-top:-36px;">
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">Step 04</span>
+        <span class="step-title">Design Core Loops <span class="badge core" style="margin-left:8px;">Session Scale</span></span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Core Loops are the <strong>repeating activity structures</strong> that give sessions their shape — the specific things players do within any given session. Design a portfolio of <strong>5–7 distinct types</strong>, rotating through them across sessions.</p>
+
+        <div class="callout warning">
+          <div class="callout-label">The Repetition–Variety Axis</div>
+          <p>Each individual loop may repeat frequently enough to develop player mastery. The campaign retains variety through <em>rotation across the portfolio</em> — not by endlessly novelizing any single loop.</p>
+        </div>
+
+        <h3>Select a Loop to Explore</h3>
+        <div class="loop-grid" id="loop-grid">
+          <div class="loop-card active" data-loop="monster" onclick="selectLoop(this)">
+            <div class="loop-card-name">Monster Hunting</div>
+            <div class="loop-card-desc">Wilderness, tactical preparation, resource management</div>
+          </div>
+          <div class="loop-card" data-loop="town" onclick="selectLoop(this)">
+            <div class="loop-card-name">Town Defense</div>
+            <div class="loop-card-desc">Home base campaigns, attachment to persistent locations</div>
+          </div>
+          <div class="loop-card" data-loop="dungeon" onclick="selectLoop(this)">
+            <div class="loop-card-name">Dungeon Crawl</div>
+            <div class="loop-card-desc">Classic D&amp;D, tactical parties, resource attrition</div>
+          </div>
+          <div class="loop-card" data-loop="intrigue" onclick="selectLoop(this)">
+            <div class="loop-card-name">Political Intrigue</div>
+            <div class="loop-card-desc">Urban campaigns, high social skill investment</div>
+          </div>
+          <div class="loop-card" data-loop="rebellion" onclick="selectLoop(this)">
+            <div class="loop-card-name">Seeds of Rebellion</div>
+            <div class="loop-card-desc">Authoritarian settings, morally complex narratives</div>
+          </div>
+          <div class="loop-card" data-loop="survival" onclick="selectLoop(this)">
+            <div class="loop-card-name">Survival</div>
+            <div class="loop-card-desc">Wilderness expeditions, resource-scarce settings</div>
+          </div>
+          <div class="loop-card" data-loop="gladiator" onclick="selectLoop(this)">
+            <div class="loop-card-name">Gladiatorial / Competition</div>
+            <div class="loop-card-desc">Arenas, glory-seeking parties, public status as currency</div>
+          </div>
+        </div>
+
+        <!-- Loop Details -->
+        <div id="loop-detail-area">
+
+          <div id="loop-monster" class="loop-detail active">
+            <div class="flow-wrap" data-title="Monster Hunting" onclick="openModal(this)">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <div class="flow-node trigger">Monster Rumors / Signs / Tracks</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:12px;">
+                  <div class="flow-node">Prepare for Hunt</div>
+                  <div class="flow-node outcome-bad">Run / Avoid</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Go Hunt → Encounter Monster</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-good">Save it</div>
+                  <div class="flow-node">Fight</div>
+                  <div class="flow-node outcome-bad">Flee</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓ (if fight)</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-good">Harvest Parts</div>
+                  <div class="flow-node outcome-good">Capture</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node loop-back">↺ New monster surfaces</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="loop-town" class="loop-detail">
+            <div class="flow-wrap" data-title="Town Defense" onclick="openModal(this)">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <div class="flow-node trigger">Threat Approaches / Identified</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Gather Intelligence</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Prepare Defenses (fortify, recruit, position)</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Manage the Crisis</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-good">Repel threat</div>
+                  <div class="flow-node outcome-bad">Partial failure / setback</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Aftermath (aid survivors, address root cause)</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node loop-back">↺ New threat emerges</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="loop-dungeon" class="loop-detail">
+            <div class="flow-wrap" data-title="Dungeon Crawl" onclick="openModal(this)">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <div class="flow-node trigger">Dungeon Discovered / Rumored</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Enter and Explore</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-bad">Hazard / Enemy</div>
+                  <div class="flow-node">Puzzle / Lore</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Recover / Press On</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-good">Find reward</div>
+                  <div class="flow-node outcome-bad">Find deeper complication</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Exit / Rest</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node loop-back">↺ New dungeon surfaces</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="loop-intrigue" class="loop-detail">
+            <div class="flow-wrap" data-title="Political Intrigue" onclick="openModal(this)">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <div class="flow-node trigger">Power struggle surfaces</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Assess factions and interests</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node">Align with a faction</div>
+                  <div class="flow-node">Remain neutral / play factions</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Gather leverage (information, allies, resources)</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Execute political move</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-good">Gain influence</div>
+                  <div class="flow-node outcome-bad">Backlash / new enemy</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Political landscape shifts</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node loop-back">↺ New conflict emerges</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="loop-rebellion" class="loop-detail">
+            <div class="flow-wrap" data-title="Seeds of Rebellion" onclick="openModal(this)">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <div class="flow-node trigger">Injustice Discovered</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-good">Act</div>
+                  <div class="flow-node outcome-bad">Ignore</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓ (if Act)</div>
+                <div class="flow-node">Stir Opposition (recruit, persuade, expose)</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Escalate Action (protest, sabotage, confrontation)</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Partial Resolution: "Did what we could"</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node loop-back">↺ New / deeper injustice surfaces</div>
+              </div>: Act path and Ignore path -->
+              <div style="position:relative;margin-top:10px;">
+              </div>
+            </div>
+          </div>
+
+          <div id="loop-survival" class="loop-detail">
+            <div class="flow-wrap" data-title="Survival" onclick="openModal(this)">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <div class="flow-node trigger">Resources Deplete</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Forage / Scavenge / Trade</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Manage Party Condition (hunger, exposure, morale)</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node outcome-bad">Environmental or Hostile Threat</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-good">Overcome</div>
+                  <div class="flow-node outcome-bad">Suffer loss</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Temporary Safety</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node loop-back">↺ Resources Deplete — Loop Repeats</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="loop-gladiator" class="loop-detail">
+            <div class="flow-wrap" data-title="Gladiatorial / Competition" onclick="openModal(this)">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                <div class="flow-node trigger">Competition Announced / Entered</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Preparation (training, scouting, finding advantage)</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Compete</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div style="display:flex;gap:8px;">
+                  <div class="flow-node outcome-good">Victory</div>
+                  <div class="flow-node outcome-bad">Defeat</div>
+                </div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node">Consequences: fame, rivals, opportunities, enemies</div>
+                <div style="color:var(--gold-dim);">↓</div>
+                <div class="flow-node loop-back">↺ Next competition surfaces</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /loop-detail-area -->
+      </div>
+    </details>
+  </section>
+
+  <!-- Step 5 -->
+  <section class="section" id="step5" style="margin-top:-36px;">
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">Step 05</span>
+        <span class="step-title">Wire the Loops Together</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Once all three loop types are designed, they must be <strong>connected into a coherent system</strong>. Actions in Core Loops produce consequences that advance Progress Loops; accumulated Progress Loop advancement brings the Meta Loop's terminal states within reach.</p>
+
+        <div class="callout warning">
+          <div class="callout-label">The Wiring Test</div>
+          <p>For each Core Loop, verify: (1) Which Progress Loop(s) does successful completion advance? (2) How does engaging with this loop make the Meta Loop's stakes feel tangible? A Core Loop that fails both tests is an isolated activity — entertaining in isolation, but contributing nothing to campaign momentum.</p>
+        </div>
+
+        <h3>System Map</h3>
+        <div class="flow-wrap" data-title="Full System Map — Loops Wired Together" onclick="openModal(this)">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <div style="background:rgba(123,94,167,0.15);border:1px solid rgba(123,94,167,0.5);border-radius:4px;padding:10px 24px;font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.08em;color:#B08ED4;text-align:center;">
+              META LOOP<br><span style="font-size:10px;opacity:0.7;font-family:'Crimson Pro',serif;font-style:italic;">Hook → Antagonist Chain → Terminal State</span>
+            </div>
+            <div style="color:var(--gold-dim);font-size:20px;">↑</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+              <div style="background:rgba(46,125,107,0.12);border:1px solid rgba(46,125,107,0.4);border-radius:4px;padding:8px 16px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.08em;color:#6FC7AD;text-align:center;">Progress Loop A</div>
+              <div style="background:rgba(46,125,107,0.12);border:1px solid rgba(46,125,107,0.4);border-radius:4px;padding:8px 16px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.08em;color:#6FC7AD;text-align:center;">Progress Loop B</div>
+              <div style="background:rgba(46,125,107,0.12);border:1px solid rgba(46,125,107,0.4);border-radius:4px;padding:8px 16px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.08em;color:#6FC7AD;text-align:center;">Progress Loop C</div>
+            </div>
+            <div style="color:var(--gold-dim);font-size:20px;">↑</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+              <div style="background:rgba(139,94,60,0.12);border:1px solid rgba(139,94,60,0.4);border-radius:4px;padding:6px 12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.07em;color:#C99B6E;text-align:center;">Core Loop 1</div>
+              <div style="background:rgba(139,94,60,0.12);border:1px solid rgba(139,94,60,0.4);border-radius:4px;padding:6px 12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.07em;color:#C99B6E;text-align:center;">Core Loop 2</div>
+              <div style="background:rgba(139,94,60,0.12);border:1px solid rgba(139,94,60,0.4);border-radius:4px;padding:6px 12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.07em;color:#C99B6E;text-align:center;">Core Loop 3</div>
+              <div style="background:rgba(139,94,60,0.12);border:1px solid rgba(139,94,60,0.4);border-radius:4px;padding:6px 12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.07em;color:#C99B6E;text-align:center;">Core Loop 4</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout example">
+          <div class="callout-label">✦ Example — Mythic Odyssey Wiring</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Core Loop</th><th>Feeds Progress Loop(s)</th></tr></thead>
+              <tbody>
+                <tr><td>Monster Hunting</td><td><span class="wiring-badge">Renown</span><span class="wiring-badge">Piety</span><span class="wiring-badge">Leveling</span></td></tr>
+                <tr><td>Gladiator Battles</td><td><span class="wiring-badge">Renown</span><span class="wiring-badge">Leveling</span></td></tr>
+                <tr><td>Seeds of Rebellion</td><td><span class="wiring-badge">Renown</span><span class="wiring-badge">Monster Arc</span></td></tr>
+                <tr><td>Town Defense</td><td><span class="wiring-badge">Renown</span><span class="wiring-badge">Piety</span><span class="wiring-badge">Leveling</span></td></tr>
+                <tr><td>Dungeon Crawl</td><td><span class="wiring-badge">Leveling</span><span class="wiring-badge">Piety</span><span class="wiring-badge">Monster Arc</span></td></tr>
+                <tr><td>Political Intrigue</td><td><span class="wiring-badge">Renown</span><span class="wiring-badge">Piety</span></td></tr>
+                <tr><td>Survival</td><td><span class="wiring-badge">Leveling</span> + narrative tension for all others</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Step 6 -->
+  <section class="section" id="step6" style="margin-top:-36px;">
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">Step 06</span>
+        <span class="step-title">Design Entry Hooks for Each Core Loop</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>A Core Loop that players cannot find cannot function. For each Core Loop, prepare a minimum of <strong>three entry hooks</strong> — specific, concrete fictional circumstances that naturally draw the party into that loop's activity structure.</p>
+
+        <h3>Hook Taxonomy</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Hook Type</th><th>Definition</th><th>Design Consideration</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Personal</strong></td>
+                <td>Tied to a specific PC's backstory, relationships, or home</td>
+                <td>Guarantees at least one player is invested before the loop begins</td>
+              </tr>
+              <tr>
+                <td><strong>Geographic</strong></td>
+                <td>Located along the party's current or planned travel route</td>
+                <td>Low-friction; loop is encountered rather than sought</td>
+              </tr>
+              <tr>
+                <td><strong>Reactive</strong></td>
+                <td>Triggered by something the party has already done</td>
+                <td>Rewards player agency; loops feel like consequences</td>
+              </tr>
+              <tr>
+                <td><strong>Proactive</strong></td>
+                <td>Pushed toward the party by antagonist action or world events</td>
+                <td>Maintains narrative pressure; ensures no loop atrophies from neglect</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout" style="margin-top:16px;">
+          <div class="callout-label">Minimum Hook Portfolio</div>
+          <p>For any given Core Loop: at minimum <strong>one Personal hook + one Geographic hook + one Reactive or Proactive hook.</strong></p>
+        </div>
+
+        <div class="callout example">
+          <div class="callout-label">✦ Example — Seeds of Rebellion Entry Hooks</div>
+          <div class="table-wrap">
+            <table style="margin-top:8px;">
+              <thead><tr><th>Hook</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td>The site of injustice is significant to one PC's background</td><td>Personal</td></tr>
+                <tr><td>The location lies along the party's established travel route</td><td>Geographic</td></tr>
+                <tr><td>The party is already searching for a contact located there</td><td>Personal / Geographic</td></tr>
+                <tr><td>A prior party action destabilized the local power structure</td><td>Reactive</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Step 7 -->
+  <section class="section" id="step7" style="margin-top:-36px;">
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">Step 07</span>
+        <span class="step-title">Pre-Campaign Verification Checklist</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Before Session Zero, verify that each component of the framework is complete and internally consistent. Click items to mark them complete.</p>
+
+        <div id="progress-display" style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.12em;color:var(--mist);margin-bottom:6px;">
+            <span>DESIGN COMPLETENESS</span>
+            <span id="progress-count">0 / 10</span>
+          </div>
+          <div class="progress-bar-outer">
+            <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="checklist-section">
+          <h4>Design Completeness</h4>
+          <ul class="checklist" id="checklist">
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>Setting tone defined; reference works compiled; emotional register identified</span></li>
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>Meta Loop constructed: inciting hook, antagonist escalation chain (minimum 3 nodes), and at minimum two terminal states</span></li>
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>2–4 Progress Loops designed; each specifies trigger condition, player action, reward, and tracking mechanism</span></li>
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>5–7 Core Loops designed; each is mappable as a decision flowchart with at minimum one branch point</span></li>
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>All Core Loops connected to at minimum one Progress Loop</span></li>
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>All Progress Loops connected to the Meta Loop's terminal conditions</span></li>
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>Each Core Loop has a minimum of three prepared entry hooks across at least two hook types</span></li>
+          </ul>
+        </div>
+
+        <div class="checklist-section">
+          <h4>Player-Facing Communication</h4>
+          <ul class="checklist" id="checklist2">
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>Players understand the campaign's setting and tone</span></li>
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>Players are aware of which Progress Loops exist and how to engage them</span></li>
+            <li onclick="toggleCheck(this)"><div class="check-box"><span class="check-mark">✓</span></div><span>Players have been given opportunity to embed personal hooks into at least one Core Loop through character creation</span></li>
+          </ul>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Reference Summary -->
+  <section class="section" style="margin-bottom:0;">
+    <div class="theory-block">
+      <h2>Reference — Design Question Summary</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Loop</th>
+              <th>Primary Design Question</th>
+              <th>Required Outputs</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge meta">Meta</span></td>
+              <td>Why do players invest emotionally in the outcome?</td>
+              <td>Inciting hook; antagonist escalation chain; branching terminal states</td>
+            </tr>
+            <tr>
+              <td><span class="badge prog">Progress</span></td>
+              <td>How do players perceive arc-level advancement?</td>
+              <td>2–4 loops; each with trigger, action, reward, and tracking mechanism; differentiated by play style</td>
+            </tr>
+            <tr>
+              <td><span class="badge core">Core</span></td>
+              <td>What activities structure individual sessions?</td>
+              <td>5–7 loops; each a decision flowchart; each connected to ≥1 Progress Loop; each with 3+ entry hooks</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:28px;">Appendix — One-Shots &amp; Short Adventures</h3>
+      <p>For single-session or short-arc (2–4 session) scenarios, the three-loop hierarchy collapses to two levels. The wiring principle remains unchanged.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Standard</th><th>Short-Form Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge meta">Meta Loop</span></td><td>Replaced by the session's primary objective; stakes are immediate rather than campaign-spanning</td></tr>
+            <tr><td><span class="badge prog">Progress Loop</span></td><td>1–2 loops; advancement visible within the session rather than across sessions</td></tr>
+            <tr><td><span class="badge core">Core Loop</span></td><td>1–2 loops; sufficient variety to sustain a single session</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout example" style="margin-top:20px;">
+        <div class="callout-label">✦ Example — One-Shot Heist</div>
+        <p><strong>Session objective (Meta substitute):</strong> Steal the artifact before dawn.</p>
+        <p><strong>Progress Loop:</strong> Plan → Execute → Escape. Players track mission phase as visible progress.</p>
+        <p><strong>Core Loops (2):</strong> Infiltration (evade guards / gather intelligence / locate the vault) and The Heist (breach / manage complications / extract safely). Each feeds the Progress Loop stage.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="attribution container">
+  <p>Framework methodology derived from the work of <strong style="color:var(--pale);">Stephanie Plays Games</strong></p>
+  <p><a href="https://www.youtube.com/watch?v=9HXCPiP54R8" target="_blank">"How to Plan a D&amp;D Campaign Using Game Loops" — YouTube</a></p>
+  <p style="margin-top:4px;"><a href="https://www.youtube.com/@StephaniePlaysGames" target="_blank">youtube.com/@StephaniePlaysGames</a></p>
+</footer>
+
+<script>
+  /* ── HERO LOOP DIAGRAM MODAL ── */
+  function openLoopModal() {
+    document.getElementById('flow-modal-title').textContent = 'The Three Nested Loops';
+    document.getElementById('flow-modal-content').innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:16px 0;">
+        <svg viewBox="0 0 420 420" width="380" height="380" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+          <defs>
+            <radialGradient id="mg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(123,94,167,0.12)"/>
+              <stop offset="100%" stop-color="rgba(123,94,167,0)"/>
+            </radialGradient>
+            <radialGradient id="pg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(46,125,107,0.14)"/>
+              <stop offset="100%" stop-color="rgba(46,125,107,0)"/>
+            </radialGradient>
+            <radialGradient id="cg" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(139,94,60,0.18)"/>
+              <stop offset="100%" stop-color="rgba(139,94,60,0)"/>
+            </radialGradient>
+          </defs>
+          <!-- Meta ring -->
+          <circle cx="210" cy="210" r="190" fill="url(#mg)" stroke="rgba(123,94,167,0.75)" stroke-width="2"/>
+          <!-- Progress ring -->
+          <circle cx="210" cy="210" r="130" fill="url(#pg)" stroke="rgba(46,125,107,0.75)" stroke-width="2"/>
+          <!-- Core ring -->
+          <circle cx="210" cy="210" r="70" fill="url(#cg)" stroke="rgba(139,94,60,0.85)" stroke-width="2"/>
+
+          <!-- Meta label -->
+          <text x="210" y="36" text-anchor="middle" font-family="Cinzel, serif" font-size="13" letter-spacing="3" fill="rgba(176,142,212,0.95)" font-weight="600">META LOOP</text>
+          <text x="210" y="52" text-anchor="middle" font-family="Crimson Pro, serif" font-size="11" fill="rgba(139,146,184,0.8)" font-style="italic">Campaign-scale emotional investment</text>
+
+          <!-- Progress label -->
+          <text x="210" y="100" text-anchor="middle" font-family="Cinzel, serif" font-size="11" letter-spacing="2" fill="rgba(111,199,173,0.9)" font-weight="600">PROGRESS LOOPS</text>
+          <text x="210" y="115" text-anchor="middle" font-family="Crimson Pro, serif" font-size="10" fill="rgba(139,146,184,0.75)" font-style="italic">Arc-scale advancement tracks</text>
+
+          <!-- Core label -->
+          <text x="210" y="197" text-anchor="middle" font-family="Cinzel, serif" font-size="10" letter-spacing="1.5" fill="rgba(201,155,110,0.95)" font-weight="600">CORE LOOPS</text>
+          <text x="210" y="212" text-anchor="middle" font-family="Crimson Pro, serif" font-size="9" fill="rgba(139,146,184,0.75)" font-style="italic">Session-scale activities</text>
+
+          <!-- Scope labels on right side -->
+          <line x1="400" y1="210" x2="370" y2="210" stroke="rgba(123,94,167,0.4)" stroke-width="1" stroke-dasharray="3,2"/>
+          <text x="405" y="214" font-family="Cinzel, serif" font-size="9" fill="rgba(176,142,212,0.7)" letter-spacing="1">Entire campaign</text>
+
+          <line x1="340" y1="150" x2="320" y2="170" stroke="rgba(46,125,107,0.4)" stroke-width="1" stroke-dasharray="3,2"/>
+
+          <!-- Design order arrow -->
+          <text x="210" y="390" text-anchor="middle" font-family="Cinzel, serif" font-size="10" letter-spacing="2" fill="rgba(201,168,76,0.6)">DESIGN OUTSIDE → IN</text>
+        </svg>
+
+        <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:420px;">
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;background:rgba(123,94,167,0.07);border:1px solid rgba(123,94,167,0.3);border-radius:4px;">
+            <div style="width:12px;height:12px;border-radius:50%;border:2px solid #7B5EA7;background:rgba(123,94,167,0.2);flex-shrink:0;margin-top:3px;"></div>
+            <div><div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.1em;color:#B08ED4;margin-bottom:4px;">META LOOP — Entire Campaign</div><div style="font-size:14px;color:var(--mist);">Why do players invest in the outcome? Defines the central conflict, antagonist chain, and terminal states.</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;background:rgba(46,125,107,0.07);border:1px solid rgba(46,125,107,0.3);border-radius:4px;">
+            <div style="width:12px;height:12px;border-radius:50%;border:2px solid #2E7D6B;background:rgba(46,125,107,0.2);flex-shrink:0;margin-top:3px;"></div>
+            <div><div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.1em;color:#6FC7AD;margin-bottom:4px;">PROGRESS LOOPS — Multi-Session Arcs</div><div style="font-size:14px;color:var(--mist);">How do players perceive advancement? 2–4 parallel tracks rewarding different play styles.</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:14px;padding:12px 16px;background:rgba(139,94,60,0.07);border:1px solid rgba(139,94,60,0.3);border-radius:4px;">
+            <div style="width:12px;height:12px;border-radius:50%;border:2px solid #8B5E3C;background:rgba(139,94,60,0.2);flex-shrink:0;margin-top:3px;"></div>
+            <div><div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.1em;color:#C99B6E;margin-bottom:4px;">CORE LOOPS — Individual Sessions</div><div style="font-size:14px;color:var(--mist);">What activities structure each session? 5–7 repeating activity types, each feeding a Progress Loop.</div></div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById('flow-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  /* ── LOOP SELECTOR ── */
+  function selectLoop(card) {
+    document.querySelectorAll('.loop-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.loop-detail').forEach(d => d.classList.remove('active'));
+    card.classList.add('active');
+    document.getElementById('loop-' + card.dataset.loop).classList.add('active');
+  }
+
+  /* ── CHECKLIST ── */
+  function toggleCheck(li) {
+    li.classList.toggle('checked');
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const all     = document.querySelectorAll('.checklist li');
+    const checked = document.querySelectorAll('.checklist li.checked');
+    document.getElementById('progress-count').textContent = checked.length + ' / ' + all.length;
+    document.getElementById('progress-bar').style.width   = (checked.length / all.length * 100) + '%';
+  }
+
+  /* ── LIGHTBOX ── */
+  function openModal(flowWrap) {
+    const title   = flowWrap.getAttribute('data-title') || 'Flowchart';
+    const content = flowWrap.cloneNode(true);
+
+    // Remove cursor and the expand hint from the clone, and disable nested clicks
+    content.style.cursor   = 'default';
+    content.style.margin   = '0';
+    content.style.border   = 'none';
+    content.style.background = 'transparent';
+    content.style.padding  = '0';
+    content.removeAttribute('onclick');
+    content.removeAttribute('data-title');
+    content.classList.remove('flow-wrap'); // don't inherit zoom-in cursor or ::after
+
+    document.getElementById('flow-modal-title').textContent = title;
+    document.getElementById('flow-modal-content').innerHTML = '';
+    document.getElementById('flow-modal-content').appendChild(content);
+    document.getElementById('flow-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModalDirect() {
+    document.getElementById('flow-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeModal(e) {
+    // Only close if clicking the backdrop, not the inner panel
+    if (e.target === document.getElementById('flow-modal')) {
+      closeModalDirect();
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModalDirect();
+  });
+</script>
+</body>
+</html>

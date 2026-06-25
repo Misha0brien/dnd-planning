@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player Motivation Taxonomy — D&D Player Type Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #0D0F1A;
+    --deep:      #131525;
+    --slate:     #1C1F35;
+    --panel:     #22263D;
+    --border:    #2E3356;
+    --gold:      #C9A84C;
+    --gold-dim:  #8A6B2A;
+    --gold-glow: rgba(201,168,76,0.18);
+    --amber:     #E8C46A;
+    --crimson:   #8B2635;
+    --mist:      #8B92B8;
+    --pale:      #C8CCDF;
+    --white:     #EEF0F8;
+    --meta-col:  #7B5EA7;
+    --prog-col:  #2E7D6B;
+    --core-col:  #8B5E3C;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--ink);
+    color: var(--pale);
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── SITE NAV ── */
+  .site-nav {
+    background: var(--deep);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .site-nav-home {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    padding: 14px 0;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+  }
+  .site-nav-home:hover { opacity: 1; }
+  .site-nav-links { display: flex; }
+  .site-nav-link {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mist);
+    text-decoration: none;
+    padding: 14px 18px;
+    border-left: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s;
+  }
+  .site-nav-link:hover { color: var(--gold); background: var(--gold-glow); }
+  .site-nav-link.current { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: 72px 24px 60px;
+    overflow: visible;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 50% 100%, rgba(123,94,167,0.06) 0%, transparent 60%),
+                var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(201,168,76,0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(123,94,167,0.04) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.15;
+    max-width: 800px;
+    margin: 0 auto 18px;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--mist);
+    max-width: 540px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+  }
+
+  /* ── NAV ── */
+  .step-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 24px;
+  }
+
+  .nav-pill {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--mist);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-pill:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow); }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .section { margin: 48px 0; }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step-card:hover { border-color: var(--gold-dim); }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .step-header::-webkit-details-marker { display: none; }
+
+  .step-number {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    flex-shrink: 0;
+    width: 52px;
+  }
+
+  .step-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    flex: 1;
+    letter-spacing: 0.04em;
+  }
+
+  .step-chevron {
+    font-size: 12px;
+    color: var(--mist);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  details[open] .step-chevron { transform: rotate(90deg); }
+  details[open] > .step-header { border-bottom: 1px solid var(--border); }
+
+  .step-body {
+    padding: 28px 24px 28px 92px;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    margin: 28px 0 12px;
+  }
+
+  h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin: 20px 0 8px;
+  }
+
+  p { margin-bottom: 14px; }
+  strong { color: var(--white); font-weight: 600; }
+  em { color: var(--mist); }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  th {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(201,168,76,0.05);
+  }
+
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(46,51,86,0.5);
+    font-size: 15px;
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-left: 3px solid var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 3px 3px 0;
+  }
+  .callout-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .callout p { margin-bottom: 8px; font-size: 15px; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .callout.example {
+    border-color: rgba(123,94,167,0.6);
+    background: rgba(123,94,167,0.05);
+  }
+  .callout.example .callout-label { color: #B08ED4; }
+
+  .callout.warning {
+    border-color: rgba(139,94,60,0.7);
+    background: rgba(139,94,60,0.05);
+  }
+  .callout.warning .callout-label { color: #C99B6E; }
+
+  /* ── PAIR CARDS ── */
+  .pair-card {
+    border-left: 3px solid;
+    border-radius: 0 3px 3px 0;
+    padding: 14px 18px;
+    margin: 8px 0;
+  }
+  .pair-card .pair-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .pair-card p {
+    font-size: 15px;
+    color: var(--pale);
+    margin: 0;
+    line-height: 1.6;
+  }
+  .pair-card.synergy {
+    border-color: rgba(46,125,107,0.7);
+    background: rgba(46,125,107,0.04);
+  }
+  .pair-card.synergy .pair-label { color: #6FC7AD; }
+  .pair-card.conflict {
+    border-color: rgba(139,38,53,0.7);
+    background: rgba(139,38,53,0.04);
+  }
+  .pair-card.conflict .pair-label { color: #D47A85; }
+
+  /* ── COMPATIBILITY MATRIX ── */
+  .matrix-table th, .matrix-table td {
+    padding: 8px 10px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .matrix-table th:first-child, .matrix-table td:first-child {
+    text-align: left;
+    padding-left: 14px;
+  }
+  .matrix-table td:first-child {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+  }
+  .compat-great    { color: #6FC7AD; font-weight: 600; }
+  .compat-good     { color: #8DC9B8; }
+  .compat-neutral  { color: var(--mist); }
+  .compat-mild     { color: var(--amber); }
+  .compat-conflict { color: #D47A85; }
+  .compat-hard     { color: #E85F6E; font-weight: 600; }
+  .compat-self     { color: var(--border); }
+
+  /* ── THEORY BLOCK ── */
+  .theory-block {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin: 0 0 40px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+    position: relative;
+  }
+  .divider::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--ink);
+    padding: 0 12px;
+    color: var(--gold-dim);
+    font-size: 10px;
+  }
+
+  /* ── ATTRIBUTION ── */
+  .attribution {
+    text-align: center;
+    padding: 40px 24px 60px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  .attribution p { font-size: 14px; color: var(--mist); margin-bottom: 8px; }
+  .attribution a { color: var(--gold-dim); text-decoration: none; }
+  .attribution a:hover { color: var(--gold); }
+
+  /* ── LIGHTBOX MODAL ── */
+  #flow-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(8,9,18,0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    cursor: zoom-out;
+  }
+  #flow-modal.open { display: flex; }
+  #flow-modal-inner {
+    background: var(--deep);
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    padding: 36px 40px 40px;
+    max-width: 760px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    cursor: default;
+    position: relative;
+    box-shadow: 0 0 60px rgba(201,168,76,0.12), 0 0 0 1px rgba(201,168,76,0.08);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  #flow-modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  #flow-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--mist);
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 4px 10px;
+    transition: all 0.15s;
+  }
+  #flow-modal-close:hover { color: var(--gold); border-color: var(--gold-dim); background: var(--gold-glow); }
+
+  @media (max-width: 600px) {
+    .step-body { padding: 20px 16px; }
+    h1 { font-size: 26px; }
+    .theory-block { padding: 20px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SITE NAV ══ -->
+<nav class="site-nav">
+  <a class="site-nav-home" href="index.html">D&amp;D Campaign Design</a>
+  <div class="site-nav-links">
+    <a class="site-nav-link" href="game-loops.html">Game Loops</a>
+    <a class="site-nav-link current" href="player-types.html">Player Types</a>
+  </div>
+</nav>
+
+<!-- ══ LIGHTBOX MODAL ══ -->
+<div id="flow-modal" onclick="closeModal(event)">
+  <div id="flow-modal-inner">
+    <div id="flow-modal-title"></div>
+    <button id="flow-modal-close" onclick="closeModalDirect()">✕ close</button>
+    <div id="flow-modal-content"></div>
+  </div>
+</div>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <p class="eyebrow">Dungeon Master's Guide · Player Motivation Framework</p>
+  <h1>Player Motivation Taxonomy</h1>
+  <p class="hero-sub">Eight motivation types for understanding what players want from a campaign — and how to design for them.</p>
+  <nav class="step-nav">
+    <a class="nav-pill" href="#intro">Introduction</a>
+    <a class="nav-pill" href="#types">The Eight Types</a>
+    <a class="nav-pill" href="#synergy">Synergies</a>
+    <a class="nav-pill" href="#conflicts">Conflicts</a>
+    <a class="nav-pill" href="#matrix">Compatibility</a>
+    <a class="nav-pill" href="#design">DM Design</a>
+  </nav>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="container">
+
+  <!-- INTRODUCTION -->
+  <section class="section" id="intro">
+    <div class="theory-block">
+      <h2>Why This Taxonomy Exists</h2>
+      <p>"I like a mix of roleplay and combat" tells you almost nothing, because every D&amp;D game has both. The problem is that players tend to describe what they <em>do</em> at the table rather than what they <em>want</em> from it. Two players can both love combat and be fundamentally incompatible: one wants cinematic heroics, the other wants to solve an encounter as a mechanical system. Two players can both love roleplay and consistently frustrate each other: one wants to inhabit their character moment to moment, the other is tracking the long-form narrative arc and finds in-the-moment improvisation beside the point.</p>
+      <p>The Dungeon Master's Guide provides a more precise vocabulary: a taxonomy of eight player motivation types. These are not exclusive categories. Most players identify with two to four types simultaneously, and the goal is to build a composite profile rather than select a single label. Understanding that profile — for yourself as a player, or for your group as a DM — is what makes it actionable.</p>
+      <div class="callout">
+        <div class="callout-label">When to Use This</div>
+        <p>This framework is most valuable at <strong>Session Zero</strong>, before any campaign begins. A group's combined motivation profile gives a DM the information needed to design a campaign that actually serves the table, and helps players recognize why some past groups felt like a poor fit even when everyone involved was engaged and well-intentioned.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE EIGHT TYPES -->
+  <section class="section" id="types">
+    <h2 style="margin-bottom:20px;">The Eight Player Types</h2>
+
+    <!-- 01 Actor -->
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">01</span>
+        <span class="step-title">The Actor</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Actors are at the table to play a character, not just move one. They develop a distinct personality for their PC, complete with its own voice, mannerisms, and internal logic, and they engage with the game from inside that character's perspective rather than from above it. The satisfaction is in the performance itself, not in what is accomplished mechanically.</p>
+        <h3>How to Recognize This Type</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>Maintains a distinct voice or manner of speaking when in character</li>
+          <li>Asks what the shopkeeper's name is, then conducts an in-character conversation about the wares rather than asking the DM for a price list</li>
+          <li>Adds narrative color to combat: describes how their character moves, what they're thinking, a dramatic line before the killing blow</li>
+          <li>Makes decisions based on what the character would do, even when it conflicts with what is optimal</li>
+          <li>Engages with NPC relationships, history, and motivation well beyond what is mechanically necessary</li>
+        </ul>
+        <h3>What They Need from the DM</h3>
+        <p>NPCs require enough texture to hold a conversation: consistent names, mannerisms, and motivations at minimum. Social encounters and character-to-character scenes are high-value content for this type. Sessions built entirely around combat and dungeon mechanics, without space for performance, will leave Actors disengaged from the content they came for.</p>
+      </div>
+    </details>
+
+    <!-- 02 Explorer -->
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">02</span>
+        <span class="step-title">The Explorer</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Explorers want to know what is behind every door, under every rock, and in the pocket of every incidental NPC. The world itself is the attraction. Lore, geography, hidden details, and the layered history of a setting are intrinsically interesting to them — not as instruments of power, but as ends in their own right. An incomplete map or an uninvestigated room is a genuinely uncomfortable thing to leave behind.</p>
+        <h3>How to Recognize This Type</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>Rolls Investigation on objects and environments the DM described in passing</li>
+          <li>Needs to know the titles of the books on that dusty shelf</li>
+          <li>Has difficulty moving on from an unexplained detail or a door that was never opened</li>
+          <li>Loots every encounter thoroughly, not out of greed but because leaving without accounting for everything present feels like an unfinished task</li>
+          <li>Follows up on any environmental detail flagged as unusual, regardless of whether the DM intended it to be significant</li>
+        </ul>
+        <h3>What They Need from the DM</h3>
+        <p>A world that rewards investigation. DMs should be deliberate about which environmental details they describe in passing, because any flagged detail becomes a potential investigation target. One throwaway curtain mentioned in a scene description can spawn a full investigative sequence if the DM is not prepared to substantiate it.</p>
+      </div>
+    </details>
+
+    <!-- 03 Fighter -->
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">03</span>
+        <span class="step-title">The Fighter</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Fighters came for combat, and they built their character around it on purpose. Damage output, control abilities, and tactical positioning are not incidental features of their sheet; they are the point. The ideal session contains at least one substantive fight against an enemy that clearly needs to be fought. Scenes that delay or avoid combat are not downtime between the action — to a Fighter, they are the thing in the way of it.</p>
+        <h3>How to Recognize This Type</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>Gets restless during long social encounters or planning phases</li>
+          <li>Prefers enemies whose hostility is structurally legible: undead, aberrations, creatures that cannot be negotiated with</li>
+          <li>Wants combat described in terms of consequence and impact, not just resolved as a numbers exchange</li>
+          <li>Feels the urge to interrupt a villain's speech and initiate combat rather than wait for the scene to conclude</li>
+          <li>May disengage when a non-combat solution eliminates an encounter they had prepared and positioned for</li>
+        </ul>
+        <h3>What They Need from the DM</h3>
+        <p>At least one substantial combat encounter per session. When investigations or social scenes run long, Fighters disengage — structuring those as distinct beats, with a fight clearly forthcoming, helps retain engagement. Providing enemies with unambiguous hostile intent at regular intervals gives Fighters the uncomplicated conflict their engagement depends on.</p>
+      </div>
+    </details>
+
+    <!-- 04 Instigator -->
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">04</span>
+        <span class="step-title">The Instigator</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Instigators come to cause things to happen and watch the world respond. Planning and caution have their place, but not at the game table, where bold action and real risk are the whole point. Negative consequences do not discourage the Instigator; they are evidence that choices carry weight, which is the precondition for anything at the table being genuinely exciting.</p>
+        <h3>How to Recognize This Type</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>Acts first and processes the consequences afterward</li>
+          <li>Finds extended planning sessions tedious and may force action to bring them to an end</li>
+          <li>Is energized rather than deterred by the prospect of things going badly</li>
+          <li>Needs to feel that their choices leave a persistent, observable mark on the world</li>
+          <li>Will interact with anything volatile: the hornet's nest, the unstable artifact, the suspicious mechanism</li>
+        </ul>
+        <h3>What They Need from the DM</h3>
+        <p>A world that actually responds to agency. Cosmetic consequences or outcomes that get quietly walked back will extinguish Instigator engagement quickly. Anything in a session that could plausibly be provoked needs a prepared consequence, because an Instigator will provoke it. They are the player type most likely to test whether the world is real, and the campaign should be able to answer that question.</p>
+      </div>
+    </details>
+
+    <!-- 05 Optimizer -->
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">05</span>
+        <span class="step-title">The Optimizer</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Optimizers approach character creation as a design problem with a correct solution. Every feat, ability score, spell selection, and subclass choice should work in deliberate concert toward a specific mechanical peak. The satisfaction comes from the design process itself, and from the moment when careful construction produces a result that demonstrates the system was solved.</p>
+        <h3>How to Recognize This Type</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>Has planned character choices several levels ahead before the campaign even begins</li>
+          <li>Evaluates magic items as components of a build: a specific ring or weapon may represent the missing piece of a system they have been constructing</li>
+          <li>Finds confirmed mechanical output as satisfying as any narrative framing; the number matters</li>
+          <li>May build a social powerhouse or a skill specialist rather than a combat machine, and expects the dice to handle what the character was designed to do</li>
+          <li>Knows the rulebook in depth, sometimes more thoroughly than the DM</li>
+        </ul>
+        <h3>What They Need from the DM</h3>
+        <p>Consistent rulings. Decisions that invalidate carefully constructed build choices create sustained friction for this type. Magic item distribution is a meaningful design lever: specific items that would complete a build function as compelling, player-generated quest objectives. Varying the types of challenges presented across sessions ensures that the Optimizer's investment pays off in different contexts rather than only one.</p>
+      </div>
+    </details>
+
+    <!-- 06 Problem Solver -->
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">06</span>
+        <span class="step-title">The Problem Solver</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Problem Solvers treat every session as a strategic puzzle worth solving correctly. Whether the obstacle is a cipher, a trapped corridor, a tense negotiation, or a tactical encounter, their instinct is to think their way through it rather than force their way through it. Combat is a last resort, and an avoidable fight represents a missed opportunity. Every NPC is a potential information source; every room is a system to be mapped and understood.</p>
+        <h3>How to Recognize This Type</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>Calls for Insight checks on every NPC interaction regardless of apparent stakes, because motivations matter independently of what is said</li>
+          <li>Wants a complete plan in place before any dice are rolled in anger</li>
+          <li>Will happily spend half a session in collaborative strategizing if it leads to a cleaner outcome</li>
+          <li>Engages hard with puzzles, riddles, codes, and lateral-thinking challenges</li>
+          <li>Gets genuinely frustrated when impulsive party behavior derails a plan that was close to ready</li>
+        </ul>
+        <h3>What They Need from the DM</h3>
+        <p>Problems with real, multiple-path solutions. Problem Solvers will attempt approaches the DM did not anticipate, and the world should accommodate creative reasoning rather than funneling toward predetermined answers. Sessions composed entirely of combat encounters, without investigation, puzzle, or negotiation content, will consistently fail to engage this type.</p>
+      </div>
+    </details>
+
+    <!-- 07 Storyteller -->
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">07</span>
+        <span class="step-title">The Storyteller</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Storytellers are invested in the campaign as a long-form narrative artifact. What happens at the table is not just a game session; it is a chapter in something with a shape, a trajectory, and stakes that accumulate over time. Plot development, character arcs, and emotional consequences are the primary medium of engagement, and loot or experience points matter only insofar as they serve those ends. A fight with no narrative stakes is a fight the Storyteller finds difficult to care about.</p>
+        <h3>How to Recognize This Type</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>Wrote a detailed character backstory and expects it to matter to the plot</li>
+          <li>Experiences heightened engagement when backstory elements surface in current events</li>
+          <li>Given the choice between a material reward and a meaningful narrative outcome, chooses the narrative outcome</li>
+          <li>Disengages from random or contextually disconnected encounters that do not advance the story</li>
+          <li>Is always tracking where the current scene sits within the larger arc</li>
+        </ul>
+        <h3>What They Need from the DM</h3>
+        <p>Backstory treated as a design resource rather than background noise. Every major encounter should have a clear answer to what it means for the campaign's trajectory. Procedurally generated content — generic wilderness fights, dungeon rooms with no narrative context — erodes Storyteller investment over time, because it signals that the world is not actually going anywhere.</p>
+      </div>
+    </details>
+
+    <!-- 08 Socializer -->
+    <details class="step-card">
+      <summary class="step-header">
+        <span class="step-number">08</span>
+        <span class="step-title">The Socializer</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Socializers come to game night primarily for the people at the table. The game is the occasion; the social experience is the point. They are not deeply invested in the rules, the unfolding narrative, their character's arc, or mechanical optimization, and that is not a deficiency in their approach to the game. They are generally easygoing, adaptable, and low-friction at most tables.</p>
+        <h3>How to Recognize This Type</h3>
+        <ul style="padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:16px;color:var(--pale);">
+          <li>Lower engagement intensity across all axes compared to other player types</li>
+          <li>Has not prepared extensively between sessions and holds few strong opinions on rules questions</li>
+          <li>Follows the group's lead rather than driving direction</li>
+          <li>May become a source of friction if their disengagement is visible enough to disrupt the focus of other players</li>
+        </ul>
+        <h3>What They Need from the DM</h3>
+        <p>The Socializer is not a problem player by default. In groups where immersion, narrative investment, or mechanical engagement are the dominant modes, a visibly disengaged Socializer can undercut the collective focus that other types require. Groups composed primarily of Socializers can sustain a lighter, more improvisational style of play that suits them well; the issue is fit with incompatible types rather than anything intrinsic to the Socializer.</p>
+      </div>
+    </details>
+
+  </section>
+
+  <hr class="divider">
+
+  <!-- SYNERGY & CONFLICT ANALYSIS -->
+  <section class="section" id="synergy">
+    <div class="theory-block">
+      <h2>Conflict &amp; Synergy Analysis</h2>
+      <p>Understanding how types interact at the same table is often more actionable than understanding any individual type in isolation, particularly when building a group or diagnosing why a campaign stopped working. The patterns below describe tendencies rather than certainties; individual personalities and table culture shape outcomes as much as motivation type does.</p>
+
+      <h3>Potential Synergies</h3>
+
+      <div class="pair-card synergy">
+        <div class="pair-label">Actor + Storyteller</div>
+        <p>These two types tend to reinforce each other because they share an investment in the same layer of the game: character depth and narrative stakes. Actors focus on moment-to-moment performance; Storytellers track the arc across sessions. Each type produces content the other finds meaningful, which tends to build a table culture oriented toward immersion rather than against it.</p>
+      </div>
+
+      <div class="pair-card synergy">
+        <div class="pair-label">Explorer + Problem Solver</div>
+        <p>The potential for synergy here comes from the way these two types' engagement loops connect. The Explorer surfaces unusual details; the Problem Solver determines what they mean and how to use them. When both types are present, a campaign designed to serve one tends to serve the other at the same time, because both reward a world built with investigable depth.</p>
+      </div>
+
+      <div class="pair-card synergy">
+        <div class="pair-label">Optimizer + Problem Solver</div>
+        <p>Both types are analytically oriented and find the preparation phase satisfying in itself. The Optimizer builds a mechanical system; the Problem Solver constructs a strategic approach. Because their instincts align toward analysis and planning, they tend to function as a coherent unit at the table rather than working against each other's momentum.</p>
+      </div>
+
+      <div class="pair-card synergy">
+        <div class="pair-label">Fighter + Instigator</div>
+        <p>Both types prioritize action and have a low threshold for delay. The Instigator often initiates situations the Fighter is glad to engage with directly. Their shared risk, if both are present in strength, is collectively pushing the table toward action-first play in ways that can leave other types behind — but between themselves, friction is unlikely.</p>
+      </div>
+
+      <div class="pair-card synergy">
+        <div class="pair-label">Storyteller + Explorer</div>
+        <p>Both types reward world-building investment and tend to slow the pace in ways that reinforce each other's engagement. Neither type resists what the other wants from a scene, and both benefit when the DM has built a setting with genuine historical and geographic depth.</p>
+      </div>
+
+      <div class="pair-card synergy">
+        <div class="pair-label">Fighter + Optimizer</div>
+        <p>These types share an interest in combat performance, though they arrive at it differently: the Fighter wants the dramatic payoff of a well-fought encounter, while the Optimizer wants confirmation that the build works. Conflict between them tends to emerge only when the Optimizer engineers a bypass of an encounter entirely, leaving the Fighter without the fight they came for.</p>
+      </div>
+
+      <div class="pair-card synergy">
+        <div class="pair-label">Actor + Problem Solver</div>
+        <p>The Problem Solver's interest in NPC motivation analysis can align naturally with the Actor's preference for deep NPC engagement. Both are invested in social encounters, and while their reasons differ, the content they each want from those encounters tends to be compatible rather than competitive.</p>
+      </div>
+
+      <h3 id="conflicts" style="scroll-margin-top:24px;">Potential Conflicts</h3>
+
+      <div class="pair-card conflict">
+        <div class="pair-label">Instigator + Problem Solver</div>
+        <p>This is the most structurally adversarial pairing in the taxonomy, because these two types' primary satisfactions are in direct opposition. The Problem Solver wants to build a complete plan before acting; the Instigator wants to act before a plan exists. When both types are present, planning phases can become a source of chronic tension: the Problem Solver experiences Instigator action as premature, while the Instigator experiences the planning phase as an obstacle to the session beginning. Managing pacing carefully and creating distinct contexts for deliberation and spontaneous action can reduce this friction, but it requires active DM attention.</p>
+      </div>
+
+      <div class="pair-card conflict">
+        <div class="pair-label">Fighter + Problem Solver</div>
+        <p>The potential for conflict here comes from the fact that the Problem Solver's most satisfying outcome — avoiding combat through creative problem-solving — is the encounter the Fighter came to experience. This tension is sharpest in sessions designed primarily around non-combat solutions. Mixing encounter types, so that some reward tactical resolution and others reward lateral thinking, tends to serve both.</p>
+      </div>
+
+      <div class="pair-card conflict">
+        <div class="pair-label">Instigator + Storyteller</div>
+        <p>Storytellers invest in narrative coherence across sessions; they are tracking arcs, faction relationships, and the consequences of prior decisions. The Instigator's instinct to act boldly and immediately can periodically short-circuit that structure — burning a faction relationship before it has paid off, forcing a confrontation before the party is positioned for it, or generating a consequence that redirects the campaign's trajectory. The Instigator finds this kind of disruption exciting; the Storyteller may find it damaging to content they have been building toward.</p>
+      </div>
+
+      <div class="pair-card conflict">
+        <div class="pair-label">Actor + Instigator</div>
+        <p>The Actor's highest-value scenes are extended in-character interactions: NPC conversations, party dialogue, moments of performed character interiority. These are frequently the exact scenes the Instigator wants to abbreviate or bypass in favor of forward motion. Because both types are seeking a genuine experience at the table, neither is wrong — but the content each type wants most tends to come at the expense of the other's.</p>
+      </div>
+
+      <div class="pair-card conflict">
+        <div class="pair-label">Optimizer + Instigator</div>
+        <p>The Optimizer's build depends on stable, predictable conditions to function as designed. The Instigator generates unstable, unpredictable conditions by preference. When an Instigator's actions force a fight the party was not positioned for, redirect resources the Optimizer was counting on, or eliminate access to a specific item that was integral to a build, the resulting friction can accumulate across a campaign rather than resolving quickly.</p>
+      </div>
+
+      <div class="pair-card conflict">
+        <div class="pair-label">Socializer + Actor / Storyteller / Optimizer</div>
+        <p>The Socializer's casual engagement with the game's content is not inherently problematic, but it can become a source of friction at tables where other players require a baseline of collective focus to access their own engagement. Actors need the table to take the performance seriously; Storytellers need emotional investment in narrative stakes to feel real; Optimizers need concentration on the rules to be maintained. A visibly disengaged Socializer can undercut all three, not through active disruption, but through the absence of the engagement those types need the room to sustain.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- COMPATIBILITY MATRIX -->
+  <section class="section" id="matrix" style="margin-top:-24px;">
+    <div class="theory-block">
+      <h2>Compatibility Reference</h2>
+      <p style="font-size:15px;color:var(--mist);margin-bottom:4px;"><em>Act</em> Actor &nbsp;·&nbsp; <em>Exp</em> Explorer &nbsp;·&nbsp; <em>Ftr</em> Fighter &nbsp;·&nbsp; <em>Ins</em> Instigator &nbsp;·&nbsp; <em>Opt</em> Optimizer &nbsp;·&nbsp; <em>PSv</em> Problem Solver &nbsp;·&nbsp; <em>Str</em> Storyteller &nbsp;·&nbsp; <em>Soc</em> Socializer</p>
+      <div class="table-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Act</th>
+              <th>Exp</th>
+              <th>Ftr</th>
+              <th>Ins</th>
+              <th>Opt</th>
+              <th>PSv</th>
+              <th>Str</th>
+              <th>Soc</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Actor</td>
+              <td><span class="compat-self">—</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-conflict">✗</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-great">◎◎</span></td>
+              <td><span class="compat-mild">△</span></td>
+            </tr>
+            <tr>
+              <td>Explorer</td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-self">—</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-great">◎◎</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-mild">△</span></td>
+            </tr>
+            <tr>
+              <td>Fighter</td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-self">—</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-conflict">✗</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-neutral">○</span></td>
+            </tr>
+            <tr>
+              <td>Instigator</td>
+              <td><span class="compat-conflict">✗</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-self">—</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-hard">✗✗</span></td>
+              <td><span class="compat-conflict">✗</span></td>
+              <td><span class="compat-mild">△</span></td>
+            </tr>
+            <tr>
+              <td>Optimizer</td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-self">—</span></td>
+              <td><span class="compat-great">◎◎</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-mild">△</span></td>
+            </tr>
+            <tr>
+              <td>Prob. Solver</td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-great">◎◎</span></td>
+              <td><span class="compat-conflict">✗</span></td>
+              <td><span class="compat-hard">✗✗</span></td>
+              <td><span class="compat-great">◎◎</span></td>
+              <td><span class="compat-self">—</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-neutral">○</span></td>
+            </tr>
+            <tr>
+              <td>Storyteller</td>
+              <td><span class="compat-great">◎◎</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-conflict">✗</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-good">◎</span></td>
+              <td><span class="compat-self">—</span></td>
+              <td><span class="compat-conflict">✗</span></td>
+            </tr>
+            <tr>
+              <td>Socializer</td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-neutral">○</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-mild">△</span></td>
+              <td><span class="compat-neutral">○</span></td>
+              <td><span class="compat-conflict">✗</span></td>
+              <td><span class="compat-self">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13px;color:var(--mist);margin-top:12px;margin-bottom:0;">
+        <span class="compat-great">◎◎</span> Strong Synergy &nbsp;·&nbsp;
+        <span class="compat-good">◎</span> Synergy &nbsp;·&nbsp;
+        <span class="compat-neutral">○</span> Neutral &nbsp;·&nbsp;
+        <span class="compat-mild">△</span> Mild Tension &nbsp;·&nbsp;
+        <span class="compat-conflict">✗</span> Conflict &nbsp;·&nbsp;
+        <span class="compat-hard">✗✗</span> Strong Conflict
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- DESIGN IMPLICATIONS -->
+  <section class="section" id="design">
+    <div class="theory-block">
+      <h2>Design Implications for DMs</h2>
+      <h3>Use This at Session Zero</h3>
+      <p>Having each player identify their top two or three types produces a group profile that tells you what kinds of encounters to build, how to pace sessions, and where structural friction is likely to surface — before it does. It is also more honest than asking players whether they prefer roleplay or combat, which produces answers too broad to act on.</p>
+      <h3>Session Structure Is the Primary Tension-Management Tool</h3>
+      <p>In groups with conflicting types, the structure of a session often matters more than any individual encounter. Alternating between investigation or social scenes and combat encounters gives both ends of the spectrum content that lands for them. Instigators and Problem Solvers at the same table are best served by allowing planning phases to reach a natural completion point before consequences arrive: the Problem Solver gets their deliberation beat, and the Instigator gets a clear, sanctioned moment to act.</p>
+      <h3>Read Players as Composite Profiles</h3>
+      <p>Most players identify with two to four types simultaneously, and the composite is what actually shapes their experience. A player who is both an Actor and an Instigator wants character embodiment, but not at the expense of momentum. A player who is both an Optimizer and a Storyteller will find a magic item more compelling when it is woven into the narrative than when it appears on a loot table. The single-type label is a starting point, not the conclusion.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="attribution container">
+  <p>Framework methodology derived from the work of <strong style="color:var(--pale);">Ginny Di</strong></p>
+  <p><a href="https://www.youtube.com/@GinnyDi" target="_blank">"What do you ACTUALLY want from a D&amp;D game?" — YouTube, 2024</a></p>
+  <p style="margin-top:4px;">Original taxonomy: <em>Dungeons &amp; Dragons: Dungeon Master's Guide</em>, Wizards of the Coast, 2014 &amp; 2024</p>
+  <p style="margin-top:12px;font-size:12px;opacity:0.6;"><em>All content synthesizes Ginny Di's presentation of the DMG player type taxonomy. No methodology or classification is original to this site.</em></p>
+</footer>
+
+<script>
+  /* ── MODAL ── */
+  function closeModalDirect() {
+    document.getElementById('flow-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function closeModal(e) {
+    if (e.target === document.getElementById('flow-modal')) closeModalDirect();
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModalDirect();
+  });
+
+  /* ── PLAYER TYPE ACCORDION ──
+     Single click  → accordion (one card open at a time)
+     Double click  → independent toggle (multiple cards can be open)
+  ── */
+  (function () {
+    const DBLCLICK_MS = 220;
+    const cards = Array.from(document.querySelectorAll('#types .step-card'));
+    const pending = new Map();
+
+    cards.forEach(function (card, idx) {
+      var summary = card.querySelector('.step-header');
+
+      summary.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        if (pending.has(idx)) {
+          // Second click within threshold — double-click: independent toggle
+          clearTimeout(pending.get(idx));
+          pending.delete(idx);
+          card.open = !card.open;
+        } else {
+          // First click — wait to see if a second follows
+          pending.set(idx, setTimeout(function () {
+            pending.delete(idx);
+            // Single-click: accordion
+            var wasOpen = card.open;
+            cards.forEach(function (c) { c.open = false; });
+            if (!wasOpen) card.open = true;
+          }, DBLCLICK_MS));
+        }
+      });
+    });
+  }());
+</script>
+</body>
+</html>
