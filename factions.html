@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faction Design — Tabletop RPG Campaign Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #0D0F1A;
+    --deep:      #131525;
+    --slate:     #1C1F35;
+    --panel:     #22263D;
+    --border:    #2E3356;
+    --gold:      #C9A84C;
+    --gold-dim:  #8A6B2A;
+    --gold-glow: rgba(201,168,76,0.18);
+    --amber:     #E8C46A;
+    --crimson:   #8B2635;
+    --mist:      #8B92B8;
+    --pale:      #C8CCDF;
+    --white:     #EEF0F8;
+    --meta-col:  #7B5EA7;
+    --prog-col:  #2E7D6B;
+    --core-col:  #8B5E3C;
+    --fac-col:   #3A5AA0;
+    --fac-light: #7B9FD4;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--ink);
+    color: var(--pale);
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── SITE NAV ── */
+  .site-nav {
+    background: var(--deep);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .site-nav-dropdown { position: relative; }
+  .site-nav-trigger {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: none;
+    border: none;
+    padding: 14px 0;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .site-nav-trigger:hover { opacity: 1; }
+  .nav-chevron { transition: transform 0.2s; display: inline-block; }
+  .site-nav-dropdown.open .nav-chevron { transform: rotate(180deg); }
+  .site-nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    min-width: 210px;
+    display: none;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .site-nav-dropdown.open .site-nav-menu { display: block; }
+  .nav-menu-link {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mist);
+    text-decoration: none;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s;
+  }
+  .nav-menu-link:last-child { border-bottom: none; }
+  .nav-menu-link:hover { color: var(--gold); background: var(--gold-glow); }
+  .nav-menu-link.current { color: var(--gold); }
+  .nav-menu-link.home { color: var(--gold-dim); }
+  .nav-menu-link.home:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: 72px 24px 60px;
+    overflow: hidden;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(58,90,160,0.20) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 50% 100%, rgba(201,168,76,0.06) 0%, transparent 60%),
+                var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 40%, rgba(58,90,160,0.06) 0%, transparent 40%),
+      radial-gradient(circle at 85% 60%, rgba(201,168,76,0.04) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 1; }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.15;
+    max-width: 800px;
+    margin: 0 auto 18px;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--mist);
+    max-width: 520px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+  }
+
+  .step-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 24px 0;
+  }
+  .nav-pill {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--mist);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-pill:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  .section { margin: 48px 0; }
+
+  /* ── TYPOGRAPHY ── */
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    margin: 28px 0 12px;
+  }
+  h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin: 20px 0 8px;
+  }
+  p { margin-bottom: 14px; }
+  strong { color: var(--white); font-weight: 600; }
+  em { color: var(--mist); }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step-card:hover { border-color: var(--gold-dim); }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .step-header::-webkit-details-marker { display: none; }
+  .step-number {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    flex-shrink: 0;
+    width: 80px;
+  }
+  .step-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    flex: 1;
+    letter-spacing: 0.04em;
+  }
+  .step-chevron {
+    font-size: 12px;
+    color: var(--mist);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+  details[open] .step-chevron { transform: rotate(90deg); }
+  details[open] > .step-header { border-bottom: 1px solid var(--border); }
+  .step-body { padding: 28px 24px 28px 104px; }
+
+  /* ── THEORY / CALLOUTS ── */
+  .theory-block {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin: 0 0 40px;
+  }
+  .callout {
+    border-left: 3px solid var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 3px 3px 0;
+  }
+  .callout-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .callout p { margin-bottom: 8px; font-size: 15px; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.example { border-color: rgba(123,94,167,0.6); background: rgba(123,94,167,0.05); }
+  .callout.example .callout-label { color: #B08ED4; }
+  .callout.warning { border-color: rgba(58,90,160,0.6); background: rgba(58,90,160,0.06); }
+  .callout.warning .callout-label { color: var(--fac-light); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+    position: relative;
+  }
+  .divider::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--ink);
+    padding: 0 12px;
+    color: var(--gold-dim);
+    font-size: 10px;
+  }
+
+  /* ── VIDEO EMBED ── */
+  .video-embed {
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--deep);
+  }
+  .video-embed-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mist);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .video-embed-thumb {
+    position: relative;
+    display: block;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    text-decoration: none;
+  }
+  .video-embed-thumb img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.2s;
+  }
+  .video-embed-thumb:hover img { opacity: 0.8; }
+  .video-embed-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .video-embed-play svg { width: 72px; height: 72px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7)); transition: transform 0.2s; }
+  .video-embed-thumb:hover .video-embed-play svg { transform: scale(1.1); }
+
+  /* ── THREE SPHERES ── */
+  .sphere-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .sphere-card {
+    background: rgba(58,90,160,0.07);
+    border: 1px solid rgba(58,90,160,0.3);
+    border-radius: 4px;
+    padding: 18px 20px;
+  }
+  .sphere-name {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fac-light);
+    margin-bottom: 8px;
+  }
+  .sphere-desc { font-size: 14px; color: var(--mist); line-height: 1.5; margin: 0; }
+
+  /* ── SPECIFICITY LADDER ── */
+  .spec-ladder {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .spec-rung {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .spec-rung-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    width: 56px;
+    padding-top: 3px;
+  }
+  .spec-rung.vague .spec-rung-label { color: var(--mist); }
+  .spec-rung.better .spec-rung-label { color: var(--amber); }
+  .spec-rung.best .spec-rung-label { color: var(--fac-light); }
+  .spec-rung.vague { border-color: rgba(139,146,184,0.3); }
+  .spec-rung.better { border-color: rgba(232,196,106,0.4); }
+  .spec-rung.best { border-color: rgba(58,90,160,0.6); background: rgba(58,90,160,0.06); }
+  .spec-rung-text { font-size: 15px; line-height: 1.5; }
+  .spec-rung.vague .spec-rung-text { color: var(--mist); }
+  .spec-rung.best .spec-rung-text { color: var(--pale); }
+
+  /* ── VARIANCE DIAGRAM ── */
+  .variance-diagram {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .variance-goal {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white);
+    text-align: center;
+    padding: 10px;
+    background: rgba(58,90,160,0.1);
+    border: 1px solid rgba(58,90,160,0.4);
+    border-radius: 3px;
+    margin-bottom: 16px;
+  }
+  .variance-npcs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .variance-npc {
+    padding: 14px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .variance-npc.leader { border-color: rgba(232,196,106,0.5); background: rgba(232,196,106,0.05); }
+  .variance-npc.dissenter { border-color: rgba(139,38,53,0.45); background: rgba(139,38,53,0.05); }
+  .variance-npc-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .variance-npc.leader .variance-npc-label { color: var(--amber); }
+  .variance-npc.dissenter .variance-npc-label { color: #D47A85; }
+  .variance-npc-text { font-size: 14px; color: var(--mist); line-height: 1.45; }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(201,168,76,0.05);
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(46,51,86,0.5);
+    font-size: 15px;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── ATTRIBUTION ── */
+  .attribution {
+    text-align: center;
+    padding: 40px 24px 60px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  .attribution p { font-size: 14px; color: var(--mist); margin-bottom: 8px; }
+  .attribution a { color: var(--gold-dim); text-decoration: none; }
+  .attribution a:hover { color: var(--gold); }
+
+  @media (max-width: 640px) {
+    .step-body { padding: 20px 16px; }
+    .sphere-grid { grid-template-columns: 1fr; }
+    .variance-npcs { grid-template-columns: 1fr; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SITE NAV ══ -->
+<nav class="site-nav">
+  <div class="site-nav-dropdown" id="site-nav-dropdown">
+    <button class="site-nav-trigger" id="nav-trigger" onclick="toggleNav()" aria-expanded="false" aria-haspopup="true">
+      D&amp;D Campaign Design <span class="nav-chevron">▾</span>
+    </button>
+    <div class="site-nav-menu" id="nav-menu">
+      <a class="nav-menu-link home" href="index.html">Home</a>
+      <a class="nav-menu-link" href="game-loops.html">Game Loops</a>
+      <a class="nav-menu-link" href="player-types.html">Player Types</a>
+      <a class="nav-menu-link" href="npc-archetypes.html">NPC Archetypes</a>
+      <a class="nav-menu-link" href="quest-types.html">Quest Types</a>
+      <a class="nav-menu-link current" href="factions.html">Factions</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <div class="hero-content">
+    <p class="eyebrow">Faction Design · World Building</p>
+    <h1>The Faction 5</h1>
+    <p class="hero-sub">Five qualities that transform factions from static set dressing into the beating heart of a living campaign world.</p>
+    <nav class="step-nav">
+      <a class="nav-pill" href="#theory">Overview</a>
+      <a class="nav-pill" href="#spheres">3 Spheres</a>
+      <a class="nav-pill" href="#purpose">Purpose</a>
+      <a class="nav-pill" href="#specificity">Specificity</a>
+      <a class="nav-pill" href="#variance">Variance</a>
+      <a class="nav-pill" href="#importance">Importance</a>
+      <a class="nav-pill" href="#players">Players</a>
+      <a class="nav-pill" href="#reference">Quick Reference</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="container">
+
+  <div class="video-embed">
+    <div class="video-embed-label">Source Video</div>
+    <a class="video-embed-thumb" href="https://www.youtube.com/watch?v=oAwOr3e8GyI" target="_blank" rel="noopener" aria-label="Watch on YouTube">
+      <img src="https://img.youtube.com/vi/oAwOr3e8GyI/hqdefault.jpg" alt="The Faction 5 — Stephanie Plays Games">
+      <div class="video-embed-play">
+        <svg viewBox="0 0 68 48" xmlns="http://www.w3.org/2000/svg"><rect width="68" height="48" rx="10" fill="#FF0000"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── THEORY ── -->
+  <section class="section" id="theory">
+    <div class="theory-block">
+      <h2>The Active World Problem</h2>
+      <p>Factions are not a cosmetic layer you apply to a finished world. They are the mechanism by which a world resists, responds to, and pushes back against the players. Without factions that are actively pursuing their own agendas — before the players arrive and regardless of whether the players engage — the world is static scenery. Encounters have no consequence because nothing is at stake beyond the immediate encounter.</p>
+      <p>Three patterns tend to undermine faction design before it begins:</p>
+      <h3>Added After the Fact</h3>
+      <p>Factions designed as an afterthought, sprinkled on top of completed world-building, remain peripheral. They do not shape the world because the world was already built without them. Factions should enter the design process immediately after the campaign's high concept is established — they answer the question of <em>who is driving change here, and how.</em></p>
+      <h3>Binary Morality</h3>
+      <p>Obvious good factions and obvious evil empires remove the decisions that make faction play compelling. Players want to determine for themselves who the real antagonists are. Factions with genuine moral complexity — where multiple groups have legitimate grievances and conflicting methods — force choices that matter and generate story the DM could not have scripted.</p>
+      <h3>Treating Factions as Fixed</h3>
+      <p>If players reject a faction-driven storyline, the instinct to preserve the original design is the wrong one. Factions are not tied to themes — they are tied to <strong>conflicts</strong>. A political court intrigue can be repackaged with entirely different aesthetics (a pirate fleet, a merchant caravan, an underground church) while preserving every underlying conflict and NPC relationship. The work is portable. Staying flexible means players always find their way back toward the interesting choices.</p>
+    </div>
+  </section>
+
+  <!-- ── THREE SPHERES ── -->
+  <section class="section" id="spheres" style="margin-top:-36px;">
+    <div class="theory-block">
+      <h2>Three Spheres of Influence</h2>
+      <p>Most factions can be understood as operating primarily within one of three spheres. When designing a faction, placing it within one sphere and asking how it interacts with the others is a fast way to generate its purpose, its natural allies, and its natural rivals.</p>
+
+      <div class="sphere-grid">
+        <div class="sphere-card">
+          <div class="sphere-name">Government</div>
+          <p class="sphere-desc">Enforces order, controls access to legal power and sanctioned violence. Interested in stability — or in replacing whoever currently controls it.</p>
+        </div>
+        <div class="sphere-card">
+          <div class="sphere-name">Business &amp; Civilians</div>
+          <p class="sphere-desc">Economic interests, trade networks, community bonds. Adapts to whoever holds power. Often most willing to work with anyone who protects their livelihood.</p>
+        </div>
+        <div class="sphere-card">
+          <div class="sphere-name">Religion</div>
+          <p class="sphere-desc">Moral authority, ritual, and faith. Often a wildcard — may align with or against government depending on doctrine. Can be the faction most willing to take action others won't.</p>
+        </div>
+      </div>
+
+      <div class="callout warning" style="margin-top:8px;">
+        <div class="callout-label">Where Spheres Collide</div>
+        <p>The richest faction conflicts emerge where spheres overlap: a government trying to enforce strict laws against a merchants guild bending those laws for profit; a religious faction secretly undermining the state because their theology says the rulers are corrupt. These collisions place the party in the middle of something that cannot be resolved by fighting anyone.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ THE FACTION 5 ══ -->
+
+  <!-- Element 01: Purpose -->
+  <section class="section" id="purpose" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Element 01</span>
+        <span class="step-title">Purpose</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Every faction must have a reason to exist that keeps it active regardless of whether the players are watching. A faction without purpose is set dressing — it reacts when prodded and goes quiet when ignored. A faction with purpose is already moving, already changing things, already creating consequences that the players will walk into.</p>
+        <p>The questions to ask when designing a faction's purpose are concrete and operational: <em>Why does this faction exist? What would stop existing if this faction were destroyed today?</em> Are they enforcing order in a region that would descend into violence without them? Protecting a trade route that feeds three cities? Converting a population that the state has abandoned? If you cannot answer what the faction is doing in the world this week, it does not yet have a purpose.</p>
+        <h4>The Active World Test</h4>
+        <p>Factions should not be waiting for the players to notice them. By the time the party arrives in a location where a faction operates, that faction has already been acting. There are already consequences. Things have already changed or are in the process of changing. The party enters a situation in motion — not one that has been holding still for them.</p>
+        <div class="callout warning">
+          <div class="callout-label">Design Principle</div>
+          <p>Only create factions that are actively doing something. A thieves guild that exists because every fantasy world needs one is not a faction — it is furniture. If you find yourself designing a faction because it feels like a type that should be present, ask what it is concretely doing right now, in this city, this week. If you cannot answer, skip it and add it later if the players pull that thread.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Element 02: Specificity -->
+  <section class="section" id="specificity" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Element 02</span>
+        <span class="step-title">Specificity</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Factions with vague goals produce vague stories. The more specific a faction's goal, the more entry points the players have to collide with it — to foil it, assist it, exploit it, or subvert it from within. Specificity is what transforms a faction from a general presence into a plot.</p>
+
+        <div class="spec-ladder">
+          <div class="spec-rung vague">
+            <span class="spec-rung-label">Vague</span>
+            <span class="spec-rung-text">"Gain power." Nothing for the players to grab onto — no timeline, no method, no identifiable moment when it succeeds or fails.</span>
+          </div>
+          <div class="spec-rung better">
+            <span class="spec-rung-label">Better</span>
+            <span class="spec-rung-text">"Overthrow the king and put Frederick on the throne." A target exists. The party can at minimum decide whether they care.</span>
+          </div>
+          <div class="spec-rung best">
+            <span class="spec-rung-label">Best</span>
+            <span class="spec-rung-text">"Murder the king during the Celebration of the Return of the Moonbearers, imprison his son before loyalists can rally around him, and install Frederick on the throne as a puppet controlled by the faction's true leader." Now there is a timeline, a method, a location, a secondary target, and a hidden power structure — each one a separate hook the party can pull.</span>
+          </div>
+        </div>
+
+        <h4>The "Never Show Up" Test</h4>
+        <p>A reliable gut-check for whether a faction has enough specificity: ask yourself what happens if the players never engage with it. Walk through the faction's plans without the party present. If you feel lost on the details — if you can only say "they continue pursuing their goals" — the faction needs more concrete goals. A fully specific faction can be run as a background event with or without party involvement, and its progress or failure will have legible consequences in the world.</p>
+
+        <div class="callout example">
+          <div class="callout-label">✦ Specificity Generates Options</div>
+          <p>With the detailed goal above, the party has genuine choices: Do they try to prevent the assassination? Alert the king? Let the king die and try to free the imprisoned son? Side with Frederick because, honestly, the king has it coming? Each option requires different allies, different information, different risks — and none of them require the DM to invent new material.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Element 03: Variance -->
+  <section class="section" id="variance" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Element 03</span>
+        <span class="step-title">Variance</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>A faction where every member acts identically is a hive mind, not a political body. Real organizations contain people who share a goal but disagree — sometimes violently — on how to pursue it. Building internal variance into a faction turns it from a single entity the party must accept or reject wholesale into a web of individuals the party can play against each other.</p>
+        <p>The minimum viable cast for a major faction: a <strong>faction leader</strong> who fully embodies the central goal, and <strong>one or two dissenters or internal rivals</strong> who share the same overarching objective but have meaningfully different ideas about method, timeline, or who benefits. They are not traitors — they genuinely believe in the cause. They just disagree with how it is being pursued.</p>
+
+        <div class="variance-diagram">
+          <div class="variance-goal">Shared Goal: Overthrow the King</div>
+          <div class="variance-npcs">
+            <div class="variance-npc leader">
+              <div class="variance-npc-label">NPC A — The Ambitious</div>
+              <p class="variance-npc-text">Believes Lysander (the faction leader) is an arrogant liability and that he himself is the obvious choice for king once the current ruler is gone. Works toward the shared goal while quietly positioning himself to seize the aftermath.</p>
+            </div>
+            <div class="variance-npc dissenter">
+              <div class="variance-npc-label">NPC B — The Pragmatist</div>
+              <p class="variance-npc-text">Has no interest in who sits on the throne afterward. Wants to wipe out the entire royal line before anyone can rally around the imprisoned son. Views the faction's plan to keep the prince alive as a catastrophic mistake.</p>
+            </div>
+          </div>
+        </div>
+
+        <h4>What Variance Gives Players</h4>
+        <p>The party now has options that don't require choosing between the faction and opposition to it. They might find NPC A's ambition repellent but recognize he can be manipulated. They might agree with NPC B's security logic even if his methods are extreme. They might use the internal disagreement to fracture the faction from within. Each NPC is a lever.</p>
+        <div class="callout warning">
+          <div class="callout-label">Practical Blueprint</div>
+          <p>For each major faction, write one or two sentences per NPC: why they hold the big goal, what their separate personal goal is, and their approximate rank and resources. This gives you a faction blueprint — enough to improvise minor members on the fly while having specific people in depth when the party engages the faction seriously.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- Element 04: Importance -->
+  <section class="section" id="importance" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Element 04</span>
+        <span class="step-title">Importance</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>A faction looks great on paper and then disappears in play. This is the most common failure point — not poor design, but failure to make the faction matter when the players are at the table. Importance is about consequences: when the party interacts with a faction, something should change. Choices should create ripples. Good ones, bad ones, and strange ones that nobody anticipated.</p>
+        <p>Before introducing a faction encounter, ask: <em>Why would this faction care about this party? Why would the party want to engage with them? What are the actual stakes?</em> Does one side need resources the other controls? Information only the other possesses? Is the faction reacting to something the party already did, even unknowingly?</p>
+        <h4>Putting Factions in the Party's Path</h4>
+        <p>The introduction of a faction should be lore-rich and actionable — something the party cannot ignore and must respond to in some way. The canonical example: in <em>Curse of Strahd</em>, players entering the town of Barovia encounter people in the stocks wearing donkey masks. Nobody explains it. The faction responsible does not introduce itself. But the players immediately understand that this town has rules, punishments, and power structures — and that interacting with any of those structures will have consequences.</p>
+        <div class="callout example">
+          <div class="callout-label">✦ The Stocks Principle</div>
+          <p>The best faction introduction shows the faction's <em>effects</em> before it shows the faction itself. What does this faction's power look like in practice? Who is visibly benefiting, and who is visibly suffering? That scene — not an NPC explaining the political landscape — is what makes players feel the faction's weight.</p>
+        </div>
+        <h4>Burned Bridges</h4>
+        <p>Players cannot maintain positive relationships with every faction simultaneously. Allying with one should cost something with another, whether the party intends that cost or not. Those consequences are where the drama lives. The best faction play produces situations where the party is actively arguing about which bridge they can afford to burn — not navigating a world that accommodates all their preferences at once.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- Element 05: Players -->
+  <section class="section" id="players" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Element 05</span>
+        <span class="step-title">Players</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>The most reliable way to ensure players engage with factions is to make them members of one from the first session. The cold open where strangers meet in a tavern eliminates this. Starting the party already embedded in a faction — with shared history, known enemies, and stakes they did not have to discover — gives the players buy-in before a single die is rolled.</p>
+        <p>The player faction does not need to be powerful or prestigious. It needs to be theirs: something with a name, a purpose, and at least one identifiable rival. The party's relationship to that faction is the spine from which everything else grows.</p>
+
+        <h4>Examples from Practice</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0;">
+          <div style="background:var(--deep);border:1px solid var(--border);border-radius:4px;padding:16px 18px;">
+            <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--fac-light);margin-bottom:8px;">Fay Wild Campaign</div>
+            <p style="font-size:14px;color:var(--mist);margin:0;">Players started as the <strong style="color:var(--pale);">Bramble Brigade</strong> — a scrappy, undersourced town watch. Their immediate rival: the Baron's town guard, better equipped and politically protected. Group identity and dramatic conflict both present from session zero.</p>
+          </div>
+          <div style="background:var(--deep);border:1px solid var(--border);border-radius:4px;padding:16px 18px;">
+            <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--fac-light);margin-bottom:8px;">Underdark Campaign</div>
+            <p style="font-size:14px;color:var(--mist);margin:0;">Players united under the patronage of <strong style="color:var(--pale);">Boris</strong>, an eccentric retired explorer chasing rumors of a magic crystal. His rivals are already chasing the same thing. The party has shared purpose, an immediate external pressure, and a built-in reason to cooperate.</p>
+          </div>
+        </div>
+
+        <div class="callout warning">
+          <div class="callout-label">Everything Is a Faction</div>
+          <p>The player faction does not require a formal name or institutional structure. If the party shares a safehouse and has collectively decided to despise their noisy neighbors, that is a faction. If they are all owed money by the same merchant lord, that is a faction. The threshold is a shared stake and an identifiable outside pressure — not a charter and a seal.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── QUICK REFERENCE ── -->
+  <section class="section" id="reference" style="margin-top:-12px;">
+    <div class="theory-block">
+      <h2>Quick Reference</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Element</th>
+              <th>Core Question</th>
+              <th>Warning Sign</th>
+              <th>Fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Purpose</strong></td>
+              <td>Why does this faction exist?</td>
+              <td>Can't describe what it is doing this week</td>
+              <td>Assign it a concrete ongoing action with visible effects in the world</td>
+            </tr>
+            <tr>
+              <td><strong>Specificity</strong></td>
+              <td>What exactly does it want?</td>
+              <td>"Gaining power" or "opposing the heroes"</td>
+              <td>Name the target, the method, the timeline, and who benefits</td>
+            </tr>
+            <tr>
+              <td><strong>Variance</strong></td>
+              <td>Who disagrees with how?</td>
+              <td>Every member acts identically</td>
+              <td>Add 1–2 NPCs who share the goal but conflict on method or aftermath</td>
+            </tr>
+            <tr>
+              <td><strong>Importance</strong></td>
+              <td>Why does engaging cost something?</td>
+              <td>Party can befriend all factions without consequences</td>
+              <td>Ensure alliance with one faction creates visible friction with another</td>
+            </tr>
+            <tr>
+              <td><strong>Players</strong></td>
+              <td>Do the players belong somewhere?</td>
+              <td>Party meets as strangers with no prior stakes</td>
+              <td>Start session zero with the party already embedded in a faction of their own</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:28px;">The Three Spheres at a Glance</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Sphere</th>
+              <th>Primary Interest</th>
+              <th>Natural Rival Spheres</th>
+              <th>Wildcard Potential</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Government</strong></td>
+              <td>Order, legitimacy, monopoly on force</td>
+              <td>Religion (competing moral authority), Business (resisting regulation)</td>
+              <td>Low — tends toward status quo unless destabilized</td>
+            </tr>
+            <tr>
+              <td><strong>Business / Civilians</strong></td>
+              <td>Trade, profit, community stability</td>
+              <td>Government (over-regulation), Religion (moral constraints on trade)</td>
+              <td>Moderate — will shift allegiance toward whoever protects their interests</td>
+            </tr>
+            <tr>
+              <td><strong>Religion</strong></td>
+              <td>Doctrine, converts, moral authority</td>
+              <td>Government (secular vs. sacred power), Business (material vs. spiritual values)</td>
+              <td>High — doctrine can justify almost any action; hardest to predict</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="attribution container">
+  <p>Framework sourced from <a href="https://www.youtube.com/watch?v=oAwOr3e8GyI" target="_blank" rel="noopener">The Faction 5</a> by <a href="https://www.youtube.com/@StephaniePlaysGames" target="_blank" rel="noopener">Stephanie Plays Games</a>.</p>
+  <p style="margin-top:4px;">No methodology original to this site.</p>
+</footer>
+
+<script>
+  function toggleNav() {
+    const dd = document.getElementById('site-nav-dropdown');
+    const open = dd.classList.toggle('open');
+    document.getElementById('nav-trigger').setAttribute('aria-expanded', open);
+  }
+  document.addEventListener('click', function(e) {
+    const dd = document.getElementById('site-nav-dropdown');
+    if (dd && !dd.contains(e.target)) {
+      dd.classList.remove('open');
+      const t = document.getElementById('nav-trigger');
+      if (t) t.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
+
+</body>
+</html>

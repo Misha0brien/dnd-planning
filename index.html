@@ -41,23 +41,47 @@
     padding: 0 24px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
-  .site-nav-home {
+  .site-nav-dropdown { position: relative; }
+  .site-nav-trigger {
     font-family: 'Cinzel', serif;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--gold);
-    text-decoration: none;
+    background: none;
+    border: none;
     padding: 14px 0;
+    cursor: pointer;
     opacity: 0.85;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .site-nav-home:hover { opacity: 1; }
-  .site-nav-links { display: flex; }
-  .site-nav-link {
+  .site-nav-trigger:hover { opacity: 1; }
+  .nav-chevron { transition: transform 0.2s; display: inline-block; }
+  .site-nav-dropdown.open .nav-chevron { transform: rotate(180deg); }
+  .site-nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    min-width: 210px;
+    display: none;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .site-nav-dropdown.open .site-nav-menu { display: block; }
+  .nav-menu-link {
+    display: block;
     font-family: 'Cinzel', serif;
     font-size: 10px;
     font-weight: 600;
@@ -65,11 +89,15 @@
     text-transform: uppercase;
     color: var(--mist);
     text-decoration: none;
-    padding: 14px 18px;
-    border-left: 1px solid var(--border);
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
     transition: color 0.2s, background 0.2s;
   }
-  .site-nav-link:hover { color: var(--gold); background: var(--gold-glow); }
+  .nav-menu-link:last-child { border-bottom: none; }
+  .nav-menu-link:hover { color: var(--gold); background: var(--gold-glow); }
+  .nav-menu-link.current { color: var(--gold); }
+  .nav-menu-link.home { color: var(--gold-dim); }
+  .nav-menu-link.home:hover { color: var(--gold); }
 
   /* ── HERO RINGS ── */
   .hero-content {
@@ -362,10 +390,18 @@
 
 <!-- ══ SITE NAV ══ -->
 <nav class="site-nav">
-  <a class="site-nav-home" href="index.html">D&amp;D Campaign Design</a>
-  <div class="site-nav-links">
-    <a class="site-nav-link" href="game-loops.html">Game Loops</a>
-    <a class="site-nav-link" href="player-types.html">Player Types</a>
+  <div class="site-nav-dropdown" id="site-nav-dropdown">
+    <button class="site-nav-trigger" id="nav-trigger" onclick="toggleNav()" aria-expanded="false" aria-haspopup="true">
+      D&amp;D Campaign Design <span class="nav-chevron">▾</span>
+    </button>
+    <div class="site-nav-menu" id="nav-menu">
+      <a class="nav-menu-link home current" href="index.html">Home</a>
+      <a class="nav-menu-link" href="game-loops.html">Game Loops</a>
+      <a class="nav-menu-link" href="player-types.html">Player Types</a>
+      <a class="nav-menu-link" href="npc-archetypes.html">NPC Archetypes</a>
+      <a class="nav-menu-link" href="quest-types.html">Quest Types</a>
+      <a class="nav-menu-link" href="factions.html">Factions</a>
+    </div>
   </div>
 </nav>
 
@@ -410,6 +446,27 @@
         <div class="page-card-cta">Open Framework →</div>
       </a>
 
+      <a class="page-card" href="npc-archetypes.html">
+        <div class="page-card-eyebrow">NPC Design</div>
+        <div class="page-card-title">NPC Archetypes</div>
+        <p class="page-card-desc">A three-step framework for creating NPCs players care about — built on narrative clarity over depth, using seven archetypes drawn from the Hero's Journey.</p>
+        <div class="page-card-cta">Open Framework →</div>
+      </a>
+
+      <a class="page-card" href="quest-types.html">
+        <div class="page-card-eyebrow">Quest Design</div>
+        <div class="page-card-title">12 Quest Types</div>
+        <p class="page-card-desc">The structural building blocks of every adventure — twelve types across three categories, with design notes for each and a modifier system for escalation and variation.</p>
+        <div class="page-card-cta">Open Framework →</div>
+      </a>
+
+      <a class="page-card" href="factions.html">
+        <div class="page-card-eyebrow">World Building</div>
+        <div class="page-card-title">The Faction 5</div>
+        <p class="page-card-desc">Five qualities that transform factions from set dressing into an active world — built around Purpose, Specificity, Variance, Importance, and the players' own faction from session zero.</p>
+        <div class="page-card-cta">Open Framework →</div>
+      </a>
+
     </div>
   </section>
 
@@ -420,5 +477,19 @@
   <p style="margin-top:4px;">No methodology original to this site.</p>
 </footer>
 
+<script>
+  function toggleNav() {
+    const dd = document.getElementById('site-nav-dropdown');
+    const open = dd.classList.toggle('open');
+    document.getElementById('nav-trigger').setAttribute('aria-expanded', open);
+  }
+  document.addEventListener('click', function(e) {
+    const dd = document.getElementById('site-nav-dropdown');
+    if (dd && !dd.contains(e.target)) {
+      dd.classList.remove('open');
+      document.getElementById('nav-trigger').setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
 </body>
 </html>

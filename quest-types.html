@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quest Types — Tabletop RPG Campaign Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #0D0F1A;
+    --deep:      #131525;
+    --slate:     #1C1F35;
+    --panel:     #22263D;
+    --border:    #2E3356;
+    --gold:      #C9A84C;
+    --gold-dim:  #8A6B2A;
+    --gold-glow: rgba(201,168,76,0.18);
+    --amber:     #E8C46A;
+    --crimson:   #8B2635;
+    --mist:      #8B92B8;
+    --pale:      #C8CCDF;
+    --white:     #EEF0F8;
+    --meta-col:  #7B5EA7;
+    --prog-col:  #2E7D6B;
+    --core-col:  #8B5E3C;
+    --fetch-col: #8A6B2A;
+    --disc-col:  #7B5EA7;
+    --kill-col:  #8B2635;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--ink);
+    color: var(--pale);
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── SITE NAV ── */
+  .site-nav {
+    background: var(--deep);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .site-nav-dropdown { position: relative; }
+  .site-nav-trigger {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: none;
+    border: none;
+    padding: 14px 0;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .site-nav-trigger:hover { opacity: 1; }
+  .nav-chevron { transition: transform 0.2s; display: inline-block; }
+  .site-nav-dropdown.open .nav-chevron { transform: rotate(180deg); }
+  .site-nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    min-width: 210px;
+    display: none;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .site-nav-dropdown.open .site-nav-menu { display: block; }
+  .nav-menu-link {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mist);
+    text-decoration: none;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s;
+  }
+  .nav-menu-link:last-child { border-bottom: none; }
+  .nav-menu-link:hover { color: var(--gold); background: var(--gold-glow); }
+  .nav-menu-link.current { color: var(--gold); }
+  .nav-menu-link.home { color: var(--gold-dim); }
+  .nav-menu-link.home:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: 72px 24px 60px;
+    overflow: hidden;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(46,125,107,0.18) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 50% 100%, rgba(201,168,76,0.06) 0%, transparent 60%),
+                var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 40%, rgba(46,125,107,0.05) 0%, transparent 40%),
+      radial-gradient(circle at 85% 60%, rgba(201,168,76,0.04) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 1; }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.15;
+    max-width: 800px;
+    margin: 0 auto 18px;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--mist);
+    max-width: 520px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+  }
+
+  /* ── NAV PILLS ── */
+  .step-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 24px 0;
+  }
+  .nav-pill {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--mist);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-pill:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  .section { margin: 48px 0; }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step-card:hover { border-color: var(--gold-dim); }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .step-header::-webkit-details-marker { display: none; }
+  .step-number {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    flex-shrink: 0;
+    width: 68px;
+  }
+  .step-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    flex: 1;
+    letter-spacing: 0.04em;
+  }
+  .step-chevron {
+    font-size: 12px;
+    color: var(--mist);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+  details[open] .step-chevron { transform: rotate(90deg); }
+  details[open] > .step-header { border-bottom: 1px solid var(--border); }
+  .step-body { padding: 28px 24px 28px 92px; }
+
+  /* ── CATEGORY BADGE ── */
+  .cat-badge {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 3px;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .cat-badge.fetch {
+    background: rgba(201,168,76,0.14);
+    color: var(--amber);
+    border: 1px solid rgba(201,168,76,0.35);
+  }
+  .cat-badge.disc {
+    background: rgba(123,94,167,0.18);
+    color: #B08ED4;
+    border: 1px solid rgba(123,94,167,0.4);
+  }
+  .cat-badge.kill {
+    background: rgba(139,38,53,0.18);
+    color: #D47A85;
+    border: 1px solid rgba(139,38,53,0.4);
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    margin: 28px 0 12px;
+  }
+  h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin: 20px 0 8px;
+  }
+  p { margin-bottom: 14px; }
+  strong { color: var(--white); font-weight: 600; }
+  em { color: var(--mist); }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(201,168,76,0.05);
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(46,51,86,0.5);
+    font-size: 15px;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-left: 3px solid var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 3px 3px 0;
+  }
+  .callout-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .callout p { margin-bottom: 8px; font-size: 15px; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.example { border-color: rgba(123,94,167,0.6); background: rgba(123,94,167,0.05); }
+  .callout.example .callout-label { color: #B08ED4; }
+  .callout.warning { border-color: rgba(139,94,60,0.7); background: rgba(139,94,60,0.05); }
+  .callout.warning .callout-label { color: #C99B6E; }
+
+  /* ── THEORY BLOCK ── */
+  .theory-block {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin: 0 0 40px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+    position: relative;
+  }
+  .divider::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--ink);
+    padding: 0 12px;
+    color: var(--gold-dim);
+    font-size: 10px;
+  }
+
+  /* ── VIDEO EMBED ── */
+  .video-embed {
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--deep);
+  }
+  .video-embed-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mist);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .video-embed-thumb {
+    position: relative;
+    display: block;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    text-decoration: none;
+  }
+  .video-embed-thumb img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.2s;
+  }
+  .video-embed-thumb:hover img { opacity: 0.8; }
+  .video-embed-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .video-embed-play svg {
+    width: 72px; height: 72px;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7));
+    transition: transform 0.2s;
+  }
+  .video-embed-thumb:hover .video-embed-play svg { transform: scale(1.1); }
+
+  /* ── QUEST GRID ── */
+  .quest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .quest-card {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .quest-card:hover { background: var(--panel); }
+  .quest-card.active { background: var(--panel); }
+
+  .quest-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 5px;
+  }
+  .quest-card-hook {
+    font-size: 13px;
+    color: var(--mist);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  /* category-tinted active borders */
+  .fetch-group .quest-card.active { border-color: rgba(201,168,76,0.6); }
+  .fetch-group .quest-card-name { color: var(--amber); }
+  .fetch-group .quest-card:hover { border-color: rgba(201,168,76,0.4); }
+
+  .disc-group .quest-card.active { border-color: rgba(123,94,167,0.7); }
+  .disc-group .quest-card-name { color: #B08ED4; }
+  .disc-group .quest-card:hover { border-color: rgba(123,94,167,0.4); }
+
+  .kill-group .quest-card.active { border-color: rgba(139,38,53,0.7); }
+  .kill-group .quest-card-name { color: #D47A85; }
+  .kill-group .quest-card:hover { border-color: rgba(139,38,53,0.4); }
+
+  /* ── QUEST DETAIL ── */
+  .quest-detail { display: none; margin-top: 16px; }
+  .quest-detail.active { display: block; }
+
+  .quest-detail-inner {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 22px 26px;
+  }
+
+  .quest-detail-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .quest-detail-inner p { font-size: 16px; margin-bottom: 12px; }
+  .quest-detail-inner p:last-child { margin-bottom: 0; }
+  .quest-detail-inner h4 { margin-top: 16px; }
+  .quest-detail-inner ul {
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  /* ── MODIFIER GRID ── */
+  .modifier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .modifier-card {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .modifier-name {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .modifier-desc { font-size: 14px; color: var(--mist); line-height: 1.5; }
+
+  /* ── ATTRIBUTION ── */
+  .attribution {
+    text-align: center;
+    padding: 40px 24px 60px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  .attribution p { font-size: 14px; color: var(--mist); margin-bottom: 8px; }
+  .attribution a { color: var(--gold-dim); text-decoration: none; }
+  .attribution a:hover { color: var(--gold); }
+
+  @media (max-width: 600px) {
+    .step-body { padding: 20px 16px; }
+    .quest-grid { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SITE NAV ══ -->
+<nav class="site-nav">
+  <div class="site-nav-dropdown" id="site-nav-dropdown">
+    <button class="site-nav-trigger" id="nav-trigger" onclick="toggleNav()" aria-expanded="false" aria-haspopup="true">
+      D&amp;D Campaign Design <span class="nav-chevron">▾</span>
+    </button>
+    <div class="site-nav-menu" id="nav-menu">
+      <a class="nav-menu-link home" href="index.html">Home</a>
+      <a class="nav-menu-link" href="game-loops.html">Game Loops</a>
+      <a class="nav-menu-link" href="player-types.html">Player Types</a>
+      <a class="nav-menu-link" href="npc-archetypes.html">NPC Archetypes</a>
+      <a class="nav-menu-link current" href="quest-types.html">Quest Types</a>
+      <a class="nav-menu-link" href="factions.html">Factions</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <div class="hero-content">
+    <p class="eyebrow">Quest Design · Tabletop RPG</p>
+    <h1>12 Quest Types</h1>
+    <p class="hero-sub">The building blocks of every adventure — and how to combine, twist, and escalate them when your players go off the rails.</p>
+    <nav class="step-nav">
+      <a class="nav-pill" href="#theory">Overview</a>
+      <a class="nav-pill" href="#fetch">Fetch Quests</a>
+      <a class="nav-pill" href="#discovery">Discovery Quests</a>
+      <a class="nav-pill" href="#kill">Kill Quests</a>
+      <a class="nav-pill" href="#modifiers">Modifiers</a>
+      <a class="nav-pill" href="#reference">Quick Reference</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="container">
+
+  <div class="video-embed">
+    <div class="video-embed-label">Source Video</div>
+    <a class="video-embed-thumb" href="https://www.youtube.com/watch?v=cdil8pNLjsU" target="_blank" rel="noopener" aria-label="Watch on YouTube">
+      <img src="https://img.youtube.com/vi/cdil8pNLjsU/hqdefault.jpg" alt="12 Core Quest Types DMs Should Know — Stephanie Plays Games">
+      <div class="video-embed-play">
+        <svg viewBox="0 0 68 48" xmlns="http://www.w3.org/2000/svg"><rect width="68" height="48" rx="10" fill="#FF0000"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── THEORY ── -->
+  <section class="section" id="theory">
+    <div class="theory-block">
+      <h2>Overview</h2>
+      <p>The 12 quest types here are the structural building blocks of adventure design. They are not rigid formulas — they are a vocabulary. Naming what a quest is doing mechanically makes it easier to identify when it is failing, why it might feel stale, and how to add the twist that makes it land.</p>
+      <p>The 12 types fall under <strong>three umbrella categories</strong>, each with its own dominant mechanic and pacing profile:</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:20px 0;">
+        <div style="background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.3);border-radius:4px;padding:16px 18px;">
+          <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;">Fetch</div>
+          <p style="font-size:14px;color:var(--mist);margin:0;">Move something from one place to another — an item, a person, or a message. Clear goals, linear structure.</p>
+        </div>
+        <div style="background:rgba(123,94,167,0.08);border:1px solid rgba(123,94,167,0.35);border-radius:4px;padding:16px 18px;">
+          <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#B08ED4;margin-bottom:8px;">Discovery</div>
+          <p style="font-size:14px;color:var(--mist);margin:0;">Find, learn, reach, or master something that expands what the players know or who they are. Non-linear, reward is often information.</p>
+        </div>
+        <div style="background:rgba(139,38,53,0.08);border:1px solid rgba(139,38,53,0.35);border-radius:4px;padding:16px 18px;">
+          <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#D47A85;margin-bottom:8px;">Kill</div>
+          <p style="font-size:14px;color:var(--mist);margin:0;">Eliminate, endure, defend, or destroy a threat. High stakes, often tactically driven — but most powerful when the goal is more than just combat.</p>
+        </div>
+      </div>
+
+      <div class="callout warning" style="margin-top:4px;">
+        <div class="callout-label">The Real Skill: Combination</div>
+        <p>No quest stays one type for long. A fetch quest can become a survival quest. A kill quest can have investigation layers baked in. Recognizing the current type tells you which tools to reach for — and which type to layer in next when the first one starts to feel thin.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FETCH QUESTS ══ -->
+  <section class="section" id="fetch">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number" style="width:auto;padding-right:8px;">Group 01</span>
+        <span class="step-title">Fetch Quests <span class="cat-badge fetch">3 Types</span></span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Fetch quests have a clear, legible goal structure: move something from one point to another. That clarity is their primary strength. Players always know what they are supposed to be doing, which makes fetch quests ideal for early campaign sessions, new locations, and moments when the party needs a low-friction reason to engage with the world.</p>
+        <p>Their weakness is repetition. Without complications, twists, and consequences layered in, a stream of fetch quests can reduce a campaign to an errand log. The "but / therefore" principle applies here directly: every fetch quest needs at least one moment where something unexpected changes the trajectory.</p>
+
+        <div class="quest-grid fetch-group" id="fetch-grid">
+          <div class="quest-card active" data-quest="fetch" data-group="fetch" onclick="selectQuest(this,'fetch')">
+            <div class="quest-card-name">Fetch</div>
+            <div class="quest-card-hook">Go get a thing and bring it back</div>
+          </div>
+          <div class="quest-card" data-quest="escort" data-group="fetch" onclick="selectQuest(this,'fetch')">
+            <div class="quest-card-name">Escort</div>
+            <div class="quest-card-hook">Get an NPC from A to B safely</div>
+          </div>
+          <div class="quest-card" data-quest="delivery" data-group="fetch" onclick="selectQuest(this,'fetch')">
+            <div class="quest-card-name">Delivery</div>
+            <div class="quest-card-hook">You have the object — get it there</div>
+          </div>
+        </div>
+
+        <div id="fetch-detail-area">
+
+          <div id="fetch-quest-detail" class="quest-detail active">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Fetch Quest</div>
+              <p>The simplest quest structure: locate an object and return it to the quest-giver. The low complexity is intentional. Fetch quests function as a campaign's tutorial layer — they establish clear objectives, introduce the world's geography and its inhabitants, and let players test their characters without high-stakes pressure.</p>
+              <p>They are also the first type to grow stale. If fetch quests dominate a campaign without variation, the players' actions accumulate no structural significance — they are just running errands. The solution is not to avoid the type, but to ensure every fetch quest contains at least one complication that changes what the party thought they were doing.</p>
+              <h4>Design Pressure Points</h4>
+              <ul>
+                <li>The object is not where or what it was supposed to be</li>
+                <li>The person who had it has gone missing</li>
+                <li>The object turns out to be cursed, sentient, or actively resisting retrieval</li>
+                <li>Returning it triggers an unexpected consequence (it enables someone to become a lich; the grateful NPC offers a world-altering reward)</li>
+              </ul>
+              <div class="callout example">
+                <div class="callout-label">✦ Example Twist</div>
+                <p>The party is hired to retrieve a family heirloom for an elderly noble. BUT the person who had it has gone missing. THEREFORE what began as a retrieval is now a rescue — and the heirloom may have something to do with the disappearance.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="fetch-escort-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Escort Quest</div>
+              <p>Replace the object in a fetch quest with a person. The challenge is no longer locating something — it is keeping someone alive across a journey that has every reason to end badly for them. Escort quests share the structural clarity of basic fetch quests while adding the variable of NPC behavior, relationships, and information.</p>
+              <p>The NPC being escorted is the most underused design tool in this quest type. They are rarely just cargo. They carry knowledge of the political landscape, faction relationships, monster encounters, or personal secrets that the party can access — if they protect and engage with them. The reason this NPC needs protection is also, almost always, a direct window into the campaign's larger conflicts.</p>
+              <h4>What the NPC Can Carry</h4>
+              <ul>
+                <li>Knowledge of the destination city's power structure or hidden dangers</li>
+                <li>A firsthand account of a monster or threat nobody else has survived</li>
+                <li>Existing beef with a faction the party is about to encounter</li>
+                <li>A secret that, once revealed mid-journey, reframes the whole quest</li>
+              </ul>
+              <div class="callout warning">
+                <div class="callout-label">Watch For</div>
+                <p>An NPC who contributes nothing to the journey feels like a liability rather than a character. Give them at least one thing to say, one thing they know, or one thing they need — something that makes the players glad they kept them alive.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="fetch-delivery-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Delivery Quest</div>
+              <p>A fetch quest in reverse: the party already has the object and must get it where it needs to go. The challenge is transit, not retrieval. Like escort quests, delivery quests excel at pulling the party into unfamiliar territory with a clear goal ahead of them — which makes them especially useful for players who are hesitant to venture into more dangerous areas without a direct reason.</p>
+              <p>The sealed package is this quest type's most powerful variant. A delivery where the party does not know what they are carrying introduces immediate intrigue: what is it, why does it matter, who else wants it, and what happens if they open it? That uncertainty can turn a simple delivery into a branching web of decisions before the party even arrives at the destination.</p>
+              <h4>Story Catalyst Potential</h4>
+              <ul>
+                <li>The recipient is not who they claimed to be</li>
+                <li>Someone else intercepts the party en route and wants the package</li>
+                <li>Opening the package reveals the delivery is part of something larger (a ritual, a network, a trap)</li>
+                <li>Delivering it successfully changes the world — and not necessarily in the way the party expected</li>
+              </ul>
+              <div class="callout example">
+                <div class="callout-label">✦ Use Case</div>
+                <p>Delivery quests are particularly effective for pulling cautious or reward-focused players into dangerous regions — the mission provides the justification, and the world rewards their willingness to go there.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ══ DISCOVERY QUESTS ══ -->
+  <section class="section" id="discovery" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number" style="width:auto;padding-right:8px;">Group 02</span>
+        <span class="step-title">Discovery Quests <span class="cat-badge disc">5 Types</span></span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Discovery quests are defined by what they offer rather than what they demand. Where fetch quests ask players to move something and kill quests ask them to remove something, discovery quests ask them to <strong>learn something</strong> — about the world, about a mystery, about a place, or about themselves. The reward is almost always information, not loot.</p>
+        <p>That shift changes how stakes work. Players invest in discovery quests when the knowledge they are pursuing connects to something they already care about — a character's backstory, a faction they are aligned with, a campaign thread they have been pulling on. Without that connection, discovery quests can feel aimless. Adding a time pressure or a personal hook is often what separates a compelling mystery from a directionless wander.</p>
+
+        <div class="quest-grid disc-group" id="disc-grid">
+          <div class="quest-card active" data-quest="investigation" data-group="disc" onclick="selectQuest(this,'disc')">
+            <div class="quest-card-name">Investigation</div>
+            <div class="quest-card-hook">Uncover the truth behind a mystery</div>
+          </div>
+          <div class="quest-card" data-quest="destination" data-group="disc" onclick="selectQuest(this,'disc')">
+            <div class="quest-card-name">Destination</div>
+            <div class="quest-card-hook">Reach a legendary or hidden location</div>
+          </div>
+          <div class="quest-card" data-quest="interaction" data-group="disc" onclick="selectQuest(this,'disc')">
+            <div class="quest-card-name">Interaction</div>
+            <div class="quest-card-hook">Social maneuvering where words change everything</div>
+          </div>
+          <div class="quest-card" data-quest="mastery" data-group="disc" onclick="selectQuest(this,'disc')">
+            <div class="quest-card-name">Mastery</div>
+            <div class="quest-card-hook">Prove, perfect, or transcend an aspect of oneself</div>
+          </div>
+          <div class="quest-card" data-quest="explore" data-group="disc" onclick="selectQuest(this,'disc')">
+            <div class="quest-card-name">Exploration</div>
+            <div class="quest-card-hook">Uncover what the world did not know before</div>
+          </div>
+        </div>
+
+        <div id="disc-detail-area">
+
+          <div id="disc-investigation-detail" class="quest-detail active">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Investigation Quest</div>
+              <p>The party hunts for information, connects dots, questions NPCs, and makes deductions — including the wrong ones. Investigation quests are at their most engaging when the mystery matters personally to the players: not a random noble who was murdered, but the innkeeper who always gave them free soup.</p>
+              <p>The structural challenge is momentum. Dead ends collapse it. When the party fails an interrogation, the answer is not to give them nothing — it is to give them bad intel, or correct intel with an attached cost. Maybe they learn the truth, but now the person they interrogated knows that they know.</p>
+              <h4>Design Principles</h4>
+              <ul>
+                <li>Make the mystery personal — tie it to an NPC the party has built a relationship with, a backstory element, or a decision they made earlier</li>
+                <li>Always have a fallback clue ready if a critical roll fails — redirect rather than block</li>
+                <li>Investigation quests spiral best when solving the first mystery reveals a second, deeper one</li>
+              </ul>
+              <div class="callout example">
+                <div class="callout-label">✦ Spiraling Example</div>
+                <p>The party solves the case of a creature stalking the village. In finding the answer, they uncover a second question: how are these were-otters being created, and why do they all seem to have come from the same location? The first mystery closes; the second opens immediately beneath it.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="disc-destination-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Destination Quest</div>
+              <p>The party must reach a specific, often legendary place — one that is hidden, dangerous, or might not even exist in the form they expect. The hook is not just "go here." The real tension lives in how to find it, and what the party discovers once they arrive.</p>
+              <p>Destination quests carry unusual thematic weight because the journey itself tends to challenge what the players thought they knew. They may be a point of no return. A party that crosses into a forbidden zone, reaches a city that appears only under specific conditions, or descends into a place nobody has returned from is not just completing an objective — they are crossing a narrative threshold.</p>
+              <h4>What Makes the Destination Matter</h4>
+              <ul>
+                <li>The journey is as meaningful as the arrival — plant worldbuilding hooks and faction encounters along the route</li>
+                <li>The place holds a truth that reframes the campaign (a long-standing mystery resolved, the key to stopping a major threat)</li>
+                <li>The destination can only be reached under specific conditions — this is a baked-in puzzle before the party even sets out</li>
+              </ul>
+              <div class="callout example">
+                <div class="callout-label">✦ Minimal Setup Example</div>
+                <p>A tavern NPC mentions a floating city that appears only after a specific ritual. That is all it takes — the mystery, the danger, and the implied reward of what might be found there. The destination quest begins the moment the players decide to pursue it.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="disc-interaction-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Interaction Quest</div>
+              <p>Social and political maneuvering replaces combat as the primary challenge. Words, influence, and reputation can change everything — and one wrong word, one failed persuasion check, can shift everything in the opposite direction. The danger is more personal here than in most other quest types.</p>
+              <p>Interaction quests work across campaign contexts — not just intrigue-focused settings. Any moment when the party needs to sway a faction, build an alliance, expose corruption, or manipulate events from the inside is an interaction quest. They are also reliably excellent at sparking party conflict, since different players will want to handle social situations very differently.</p>
+              <h4>Stakes Interaction Quests Can Generate</h4>
+              <ul>
+                <li>Faction allegiances that shift and persist across the campaign</li>
+                <li>Political fallout from one failed check that takes sessions to repair</li>
+                <li>Long-term economic or military consequences the players triggered</li>
+                <li>Internal party tension over promises made, methods used, or lines crossed</li>
+              </ul>
+              <div class="callout warning">
+                <div class="callout-label">Let Disagreements Land</div>
+                <p>When the party argues about how to handle an interaction quest, let those arguments play out in ways that are interesting — not exclusively punishing. The "wait, you promised what?" moment is one of the genre's best features.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="disc-mastery-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Mastery Quest</div>
+              <p>Tied to a character's personal arc or a party milestone, mastery quests are about proving, perfecting, or transcending some aspect of the character. This does not require combat: mastery can be expressed through magic research, crafting, political reputation, or even a field the character has never attempted before.</p>
+              <p>These quests give players ownership over their progression in a way that leveling up alone cannot. A wizard who invents their own spell has done something that feels personal — because it required them to engage with the world specifically in search of that outcome.</p>
+              <h4>Classic Forms</h4>
+              <ul>
+                <li>Trial by combat against a legendary warrior (Paladin, Fighter)</li>
+                <li>Inventing a new spell through research and experimentation (Wizard)</li>
+                <li>Forging a legendary weapon from materials gathered across the campaign (Fighter, Artificer)</li>
+                <li>Earning recognition from a group that defines what the character aspires to become</li>
+              </ul>
+              <h4>Reward Design</h4>
+              <p>The reward should reflect what the character specifically cares about — not a random loot drop. A mastery quest may produce a spell book that gets passed down, a stronghold that persists in the world, or an apprentice who appears in a future campaign. These are <strong>legacy rewards</strong>: they outlast the quest that produced them.</p>
+            </div>
+          </div>
+
+          <div id="disc-explore-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Exploration Quest</div>
+              <p>The most open-ended discovery type: uncover something the players — or the world — did not know before. Exploration quests pull players into your world's history, mysteries, and strange corners. They expand not only what the players know, but who they know — new NPCs, new factions, new potential allies and antagonists tend to emerge through exploration.</p>
+              <p>The non-linear structure is intentional. Players choose their path, follow their interests, and encounter things in an order that is partly their own construction. That freedom is the appeal — but it can also produce aimlessness. A time pressure or a personal emotional hook is usually what makes the difference between exploration that feels alive and exploration that feels like wandering.</p>
+              <h4>Keeping the Party Invested</h4>
+              <ul>
+                <li>Tie the discovery to a question a player has already asked — something they have been curious about</li>
+                <li>Add a time constraint: this information will no longer be accessible after a certain event</li>
+                <li>Make the revelation matter to the campaign's larger arc — the discovery should change something, not just add to the wiki</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ══ KILL QUESTS ══ -->
+  <section class="section" id="kill" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number" style="width:auto;padding-right:8px;">Group 03</span>
+        <span class="step-title">Kill Quests <span class="cat-badge kill">4 Types</span></span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Kill quests are naturally high-stakes — the party is in direct conflict with a threat that can fight back. They are also the category most prone to being treated as purely mechanical encounters, which wastes most of their potential. The best kill quests do their most interesting work in the planning phase, before any combat begins: the recon, the arguments about approach, the moment when the party realizes the challenge is not just combat but the choice behind it.</p>
+
+        <div class="quest-grid kill-group" id="kill-grid">
+          <div class="quest-card active" data-quest="kill" data-group="kill" onclick="selectQuest(this,'kill')">
+            <div class="quest-card-name">Kill</div>
+            <div class="quest-card-hook">Eliminate the target</div>
+          </div>
+          <div class="quest-card" data-quest="survival" data-group="kill" onclick="selectQuest(this,'kill')">
+            <div class="quest-card-name">Survival</div>
+            <div class="quest-card-hook">The monster is hunting the party</div>
+          </div>
+          <div class="quest-card" data-quest="protect" data-group="kill" onclick="selectQuest(this,'kill')">
+            <div class="quest-card-name">Protect</div>
+            <div class="quest-card-hook">Hold the line; keep the target safe</div>
+          </div>
+          <div class="quest-card" data-quest="destroy" data-group="kill" onclick="selectQuest(this,'kill')">
+            <div class="quest-card-name">Destroy</div>
+            <div class="quest-card-hook">Eliminate a dangerous artifact or force</div>
+          </div>
+        </div>
+
+        <div id="kill-detail-area">
+
+          <div id="kill-kill-detail" class="quest-detail active">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Kill Quest</div>
+              <p>Eliminate the target — a monster, an NPC, a faction leader. The structure is clear; the moral and tactical complexity is where the design lives. Kill quests gain most of their power from what the target represents beyond being a stat block: their faction ties, their information, their relationships, and whether death is actually the right solution.</p>
+              <p>The most memorable kill quests tend to establish the challenge before the combat encounter. Planning, reconnaissance, party arguments about method, and pre-fight discoveries — these are where players invest emotionally. By the time the target appears, they already have something at stake in how this goes.</p>
+              <h4>Layers That Elevate Kill Quests</h4>
+              <ul>
+                <li><strong>Political fallout</strong> — the target is connected to a faction; their death creates a power vacuum or an enemy</li>
+                <li><strong>Moral uncertainty</strong> — they may be guilty, but do they have to die? Is there another path?</li>
+                <li><strong>Information they hold</strong> — the target knows something the party needs; killing them ends that thread</li>
+                <li><strong>Bounty ambiguity</strong> — a bulletin board full of names raises the question of whether all the listed targets are actually guilty</li>
+              </ul>
+            </div>
+          </div>
+
+          <div id="kill-survival-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Survival Quest</div>
+              <p>The formula inverts: the threat hunts the party. Rather than "win the fight," the objective becomes "survive long enough until something specific happens" — dawn breaks, reinforcements arrive, a ritual completes, a gate opens. Survival quests are appropriate when the threat is too strong, too relentless, or too numerous to engage head-on.</p>
+              <p>This shift from offense to endurance forces players to use skills and resources they would not normally prioritize. Traps, stealth, environmental barriers, creative use of the space — the party has to think differently. That cognitive shift under pressure tends to produce both strong roleplay and memorable table moments.</p>
+              <h4>Design Requirements</h4>
+              <ul>
+                <li>The threat must feel genuinely overwhelming — if the party can easily defeat it, the survival framing collapses</li>
+                <li>The timer must be legible — players need to understand what they are surviving until and why that endpoint matters</li>
+                <li>Route the party toward creative solutions rather than direct confrontation — the terrain and environment should offer options</li>
+              </ul>
+              <div class="callout warning">
+                <div class="callout-label">Design Note</div>
+                <p>Survival quests are a useful reminder that not every threat in a campaign is meant to be conquered. Some are meant to be outlasted or avoided. Normalizing this tendency opens up more varied threat design across the campaign.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="kill-protect-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Protect Quest</div>
+              <p>The party holds the line: a person, place, or object must survive an incoming threat. The win condition is preservation, not destruction. The party does not necessarily need to defeat the enemy — they need to prevent the enemy from reaching what they are protecting.</p>
+              <p>Protect quests scale across a wide range of campaign scenarios, from a Helm's Deep-scale siege to guarding a single NPC at a tense social gathering where assassination is practically tradition. Their power scales with how much the party already cares about what they are protecting — which is why established NPC relationships and location attachment built earlier in the campaign pay off so well here.</p>
+              <h4>Escalation Tools</h4>
+              <ul>
+                <li><strong>Escalating threats</strong> — enemies grow bolder or stronger as the clock runs down</li>
+                <li><strong>Unpredictable variables</strong> — the party had a plan; the plan is wrong; reinforce that plans fall apart</li>
+                <li><strong>Multiple fronts</strong> — the party cannot be everywhere; what do they protect and what do they risk?</li>
+                <li><strong>NPC secrets</strong> — the person they are protecting knows something that changes the situation mid-defense</li>
+              </ul>
+              <div class="callout example">
+                <div class="callout-label">✦ Scale Example</div>
+                <p>At the large end: defend a town through a monster's seasonal migration, managing fortifications, evacuation routes, and morale simultaneously. At the small end: keep the groom alive at a noble wedding where poisoning political rivals is practically tradition — and the ballroom offers very little cover.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="kill-destroy-detail" class="quest-detail">
+            <div class="quest-detail-inner">
+              <div class="quest-detail-title">Destroy Quest</div>
+              <p>The target is not a living creature but a dangerous artifact, a forbidden grimoire, an ancient relic tied to a world-ending event. The quest is to ensure that this thing can never be used by anyone again. The primary challenge is not combat — it is preparation, research, and ultimately decision-making under pressure.</p>
+              <p>The element that makes destroy quests distinctively powerful is <strong>temptation</strong>. What if the artifact grants power? What if using it just once could solve the immediate problem? Which party members resist that reasoning and which do not? These questions drive character development in ways that straightforward kill quests rarely match.</p>
+              <h4>Design Elements</h4>
+              <ul>
+                <li>The destruction method requires research or a specific location — this creates a multi-stage quest arc</li>
+                <li>Something or someone is protecting the artifact and does not want it destroyed</li>
+                <li>Using the artifact is a genuine temptation with real mechanical or narrative benefits</li>
+                <li>Success changes the world; failure may break it — the stakes should feel appropriately irreversible</li>
+              </ul>
+              <div class="callout warning">
+                <div class="callout-label">Best Used As</div>
+                <p>Destroy quests work best as overarching arcs that build over multiple sessions — a slow accumulation of research, sacrifice, and moral pressure that leads to a single irreversible final moment.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── MODIFIERS ── -->
+  <section class="section" id="modifiers" style="margin-top:-12px;">
+    <div class="theory-block">
+      <h2>Quest Modifiers</h2>
+      <p>Any of the 12 quest types can be enhanced by adding a modifier — a structural constraint that changes how the party interacts with the quest's objective. Modifiers do not change what the quest is; they change how success and failure are measured, and what pressure the party feels while pursuing the goal.</p>
+
+      <div class="modifier-grid">
+        <div class="modifier-card">
+          <div class="modifier-name">Time Modifier</div>
+          <div class="modifier-desc">A countdown clock or window of opportunity. The party must act before a deadline — after which the objective is gone, changed, or impossible.</div>
+        </div>
+        <div class="modifier-card">
+          <div class="modifier-name">Threshold Modifier</div>
+          <div class="modifier-desc">Success or failure is cumulative. The party must accumulate X successes, or avoid Y failures, across multiple scenes before the quest resolves.</div>
+        </div>
+        <div class="modifier-card">
+          <div class="modifier-name">Condition Modifier</div>
+          <div class="modifier-desc">The party is operating under a constraint — exhausted, under a curse, missing a resource, or split up. Normal tools may be unavailable.</div>
+        </div>
+        <div class="modifier-card">
+          <div class="modifier-name">Environment Modifier</div>
+          <div class="modifier-desc">The terrain actively shapes what is possible. The environment can be used as a tool, but it can also work against the party — and it changes as conditions shift.</div>
+        </div>
+        <div class="modifier-card">
+          <div class="modifier-name">Event Modifier</div>
+          <div class="modifier-desc">A secondary event is happening simultaneously. The party must manage the quest objective while something else in the world is unfolding and demanding attention.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── QUICK REFERENCE ── -->
+  <section class="section" id="reference" style="margin-top:-12px;">
+    <div class="theory-block">
+      <h2>Quick Reference</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Core Mechanic</th>
+              <th>Best Used When</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Fetch</strong></td>
+              <td><span class="cat-badge fetch">Fetch</span></td>
+              <td>Retrieve an object and return it</td>
+              <td>Campaign is early; players need clear goals and low pressure</td>
+            </tr>
+            <tr>
+              <td><strong>Escort</strong></td>
+              <td><span class="cat-badge fetch">Fetch</span></td>
+              <td>Keep an NPC alive from A to B</td>
+              <td>Introducing new territory or dropping faction lore through an NPC</td>
+            </tr>
+            <tr>
+              <td><strong>Delivery</strong></td>
+              <td><span class="cat-badge fetch">Fetch</span></td>
+              <td>Transport an object to its destination</td>
+              <td>Pulling cautious players into dangerous areas; building mystery around sealed cargo</td>
+            </tr>
+            <tr>
+              <td><strong>Investigation</strong></td>
+              <td><span class="cat-badge disc">Discovery</span></td>
+              <td>Uncover the truth behind a mystery</td>
+              <td>You want more roleplay, intrigue, and player deduction — make the mystery personal</td>
+            </tr>
+            <tr>
+              <td><strong>Destination</strong></td>
+              <td><span class="cat-badge disc">Discovery</span></td>
+              <td>Reach a legendary or hidden location</td>
+              <td>Major campaign turning points; thematic weight; point-of-no-return moments</td>
+            </tr>
+            <tr>
+              <td><strong>Interaction</strong></td>
+              <td><span class="cat-badge disc">Discovery</span></td>
+              <td>Social / political maneuvering</td>
+              <td>Shifting faction allegiances; party debates; high-stakes diplomacy without combat</td>
+            </tr>
+            <tr>
+              <td><strong>Mastery</strong></td>
+              <td><span class="cat-badge disc">Discovery</span></td>
+              <td>Prove or transcend an aspect of a character</td>
+              <td>Sandbox campaigns; personal arc milestones; legacy rewards</td>
+            </tr>
+            <tr>
+              <td><strong>Exploration</strong></td>
+              <td><span class="cat-badge disc">Discovery</span></td>
+              <td>Uncover what the world didn't know</td>
+              <td>World history, lore reveals, expanding who the players know</td>
+            </tr>
+            <tr>
+              <td><strong>Kill</strong></td>
+              <td><span class="cat-badge kill">Kill</span></td>
+              <td>Eliminate the target</td>
+              <td>Direct conflict — add moral complexity to elevate beyond combat</td>
+            </tr>
+            <tr>
+              <td><strong>Survival</strong></td>
+              <td><span class="cat-badge kill">Kill</span></td>
+              <td>Endure a threat until a specific condition is met</td>
+              <td>Overwhelming enemies; pressure-cooker tension; forcing creative problem-solving</td>
+            </tr>
+            <tr>
+              <td><strong>Protect</strong></td>
+              <td><span class="cat-badge kill">Kill</span></td>
+              <td>Keep a target safe from imminent threat</td>
+              <td>Players have established attachments; sieges; emotionally driven combat</td>
+            </tr>
+            <tr>
+              <td><strong>Destroy</strong></td>
+              <td><span class="cat-badge kill">Kill</span></td>
+              <td>Permanently eliminate a dangerous artifact or force</td>
+              <td>Long overarching arcs; temptation mechanics; irreversible final moments</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="attribution container">
+  <p>Framework sourced from <a href="https://www.youtube.com/watch?v=cdil8pNLjsU" target="_blank" rel="noopener">12 Core Quest Types DMs Should Know</a> by <a href="https://www.youtube.com/@StephaniePlaysGames" target="_blank" rel="noopener">Stephanie Plays Games</a>.</p>
+  <p style="margin-top:4px;">No methodology original to this site.</p>
+</footer>
+
+<script>
+  function toggleNav() {
+    const dd = document.getElementById('site-nav-dropdown');
+    const open = dd.classList.toggle('open');
+    document.getElementById('nav-trigger').setAttribute('aria-expanded', open);
+  }
+  document.addEventListener('click', function(e) {
+    const dd = document.getElementById('site-nav-dropdown');
+    if (dd && !dd.contains(e.target)) {
+      dd.classList.remove('open');
+      document.getElementById('nav-trigger').setAttribute('aria-expanded', 'false');
+    }
+  });
+  function selectQuest(card, group) {
+    // deactivate all cards and details in this group
+    document.querySelectorAll('#' + group + '-grid .quest-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('#' + group + '-detail-area .quest-detail').forEach(d => d.classList.remove('active'));
+
+    card.classList.add('active');
+    const questId = group + '-' + card.dataset.quest + '-detail';
+    const detail = document.getElementById(questId);
+    if (detail) detail.classList.add('active');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('flow-modal');
+      if (modal) modal.classList.remove('open');
+    }
+  });
+</script>
+
+</body>
+</html>

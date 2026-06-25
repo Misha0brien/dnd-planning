@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPC Archetypes — Tabletop RPG Campaign Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #0D0F1A;
+    --deep:      #131525;
+    --slate:     #1C1F35;
+    --panel:     #22263D;
+    --border:    #2E3356;
+    --gold:      #C9A84C;
+    --gold-dim:  #8A6B2A;
+    --gold-glow: rgba(201,168,76,0.18);
+    --amber:     #E8C46A;
+    --crimson:   #8B2635;
+    --mist:      #8B92B8;
+    --pale:      #C8CCDF;
+    --white:     #EEF0F8;
+    --meta-col:  #7B5EA7;
+    --prog-col:  #2E7D6B;
+    --core-col:  #8B5E3C;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--ink);
+    color: var(--pale);
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── SITE NAV ── */
+  .site-nav {
+    background: var(--deep);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .site-nav-dropdown { position: relative; }
+  .site-nav-trigger {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: none;
+    border: none;
+    padding: 14px 0;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .site-nav-trigger:hover { opacity: 1; }
+  .nav-chevron { transition: transform 0.2s; display: inline-block; }
+  .site-nav-dropdown.open .nav-chevron { transform: rotate(180deg); }
+  .site-nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    min-width: 210px;
+    display: none;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .site-nav-dropdown.open .site-nav-menu { display: block; }
+  .nav-menu-link {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mist);
+    text-decoration: none;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s, background 0.2s;
+  }
+  .nav-menu-link:last-child { border-bottom: none; }
+  .nav-menu-link:hover { color: var(--gold); background: var(--gold-glow); }
+  .nav-menu-link.current { color: var(--gold); }
+  .nav-menu-link.home { color: var(--gold-dim); }
+  .nav-menu-link.home:hover { color: var(--gold); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: 72px 24px 60px;
+    overflow: hidden;
+    background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(139,38,53,0.16) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 30% at 50% 100%, rgba(201,168,76,0.06) 0%, transparent 60%),
+                var(--ink);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 35%, rgba(201,168,76,0.04) 0%, transparent 40%),
+      radial-gradient(circle at 85% 65%, rgba(139,38,53,0.05) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  .hero-content { position: relative; z-index: 1; }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.15;
+    max-width: 800px;
+    margin: 0 auto 18px;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--mist);
+    max-width: 520px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+  }
+
+  /* ── NAV PILLS ── */
+  .step-nav {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 24px 0;
+  }
+  .nav-pill {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--mist);
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-pill:hover { border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow); }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .section { margin: 48px 0; }
+
+  /* ── STEP CARDS ── */
+  .step-card {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step-card:hover { border-color: var(--gold-dim); }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+  }
+  .step-header::-webkit-details-marker { display: none; }
+  .step-number {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold-dim);
+    flex-shrink: 0;
+    width: 52px;
+  }
+  .step-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+    flex: 1;
+    letter-spacing: 0.04em;
+  }
+  .step-chevron {
+    font-size: 12px;
+    color: var(--mist);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+  details[open] .step-chevron { transform: rotate(90deg); }
+  details[open] > .step-header { border-bottom: 1px solid var(--border); }
+  .step-body { padding: 28px 24px 28px 92px; }
+
+  /* ── TYPOGRAPHY ── */
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+  h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    margin: 28px 0 12px;
+  }
+  h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin: 20px 0 8px;
+  }
+  p { margin-bottom: 14px; }
+  strong { color: var(--white); font-weight: 600; }
+  em { color: var(--mist); }
+
+  /* ── TABLES ── */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(201,168,76,0.05);
+  }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(46,51,86,0.5);
+    font-size: 15px;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-left: 3px solid var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 0 3px 3px 0;
+  }
+  .callout-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .callout p { margin-bottom: 8px; font-size: 15px; }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout.example { border-color: rgba(123,94,167,0.6); background: rgba(123,94,167,0.05); }
+  .callout.example .callout-label { color: #B08ED4; }
+  .callout.warning { border-color: rgba(139,94,60,0.7); background: rgba(139,94,60,0.05); }
+  .callout.warning .callout-label { color: #C99B6E; }
+
+  /* ── THEORY BLOCK ── */
+  .theory-block {
+    background: var(--slate);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 32px;
+    margin: 0 0 40px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+    position: relative;
+  }
+  .divider::after {
+    content: '✦';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--ink);
+    padding: 0 12px;
+    color: var(--gold-dim);
+    font-size: 10px;
+  }
+
+  /* ── VIDEO EMBED ── */
+  .video-embed {
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--deep);
+  }
+  .video-embed-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mist);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .video-embed-thumb {
+    position: relative;
+    display: block;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    text-decoration: none;
+  }
+  .video-embed-thumb img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.2s;
+  }
+  .video-embed-thumb:hover img { opacity: 0.8; }
+  .video-embed-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .video-embed-play svg {
+    width: 72px;
+    height: 72px;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7));
+    transition: transform 0.2s;
+  }
+  .video-embed-thumb:hover .video-embed-play svg { transform: scale(1.1); }
+
+  /* ── STANCE PAIR ── */
+  .stance-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  @media (max-width: 540px) { .stance-pair { grid-template-columns: 1fr; } }
+
+  .stance-card {
+    padding: 18px 20px;
+    border-radius: 4px;
+    border: 1px solid;
+  }
+  .stance-card.ally {
+    border-color: rgba(46,125,107,0.5);
+    background: rgba(46,125,107,0.07);
+  }
+  .stance-card.antag {
+    border-color: rgba(139,38,53,0.5);
+    background: rgba(139,38,53,0.07);
+  }
+  .stance-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .ally .stance-label  { color: #6FC7AD; }
+  .antag .stance-label { color: #D47A85; }
+  .stance-card p { font-size: 15px; margin: 0; color: var(--pale); }
+
+  /* ── STANCE BADGES (inline) ── */
+  .badge-ally {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(46,125,107,0.18);
+    color: #6FC7AD;
+    border: 1px solid rgba(46,125,107,0.4);
+    vertical-align: middle;
+  }
+  .badge-antag {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(139,38,53,0.18);
+    color: #D47A85;
+    border: 1px solid rgba(139,38,53,0.4);
+    vertical-align: middle;
+  }
+  .badge-either {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(201,168,76,0.12);
+    color: var(--amber);
+    border: 1px solid rgba(201,168,76,0.3);
+    vertical-align: middle;
+  }
+
+  /* ── ARCHETYPE GRID ── */
+  .archetype-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .archetype-card {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .archetype-card:hover { border-color: var(--gold-dim); background: var(--panel); }
+  .archetype-card.active { border-color: var(--gold); background: var(--panel); }
+
+  .archetype-card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--amber);
+    margin-bottom: 6px;
+  }
+  .archetype-card-role {
+    font-size: 13px;
+    color: var(--mist);
+    font-style: italic;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  /* ── ARCHETYPE DETAIL ── */
+  .archetype-detail { display: none; margin-top: 16px; }
+  .archetype-detail.active { display: block; }
+
+  .archetype-detail-inner {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px 28px;
+  }
+
+  .archetype-detail-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .archetype-detail-inner p { font-size: 16px; margin-bottom: 12px; }
+  .archetype-detail-inner p:last-child { margin-bottom: 0; }
+  .archetype-detail-inner h4 { margin-top: 18px; }
+
+  /* ── TROPE CARDS ── */
+  .trope-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .trope-card {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .trope-name {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .trope-desc {
+    font-size: 13px;
+    color: var(--mist);
+    line-height: 1.5;
+  }
+
+  /* ── ATTRIBUTION ── */
+  .attribution {
+    text-align: center;
+    padding: 40px 24px 60px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+  .attribution p { font-size: 14px; color: var(--mist); margin-bottom: 8px; }
+  .attribution a { color: var(--gold-dim); text-decoration: none; }
+  .attribution a:hover { color: var(--gold); }
+
+  /* ── LIGHTBOX MODAL ── */
+  #flow-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(8,9,18,0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    cursor: zoom-out;
+  }
+  #flow-modal.open { display: flex; }
+  #flow-modal-inner {
+    background: var(--deep);
+    border: 1px solid var(--gold-dim);
+    border-radius: 6px;
+    padding: 36px 40px 40px;
+    max-width: 760px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    cursor: default;
+    position: relative;
+    box-shadow: 0 0 60px rgba(201,168,76,0.12), 0 0 0 1px rgba(201,168,76,0.08);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  #flow-modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  #flow-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--mist);
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 4px 10px;
+    transition: all 0.15s;
+  }
+  #flow-modal-close:hover { color: var(--gold); border-color: var(--gold-dim); background: var(--gold-glow); }
+
+  @media (max-width: 600px) {
+    .step-body { padding: 20px 16px; }
+    .archetype-grid { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ SITE NAV ══ -->
+<nav class="site-nav">
+  <div class="site-nav-dropdown" id="site-nav-dropdown">
+    <button class="site-nav-trigger" id="nav-trigger" onclick="toggleNav()" aria-expanded="false" aria-haspopup="true">
+      D&amp;D Campaign Design <span class="nav-chevron">▾</span>
+    </button>
+    <div class="site-nav-menu" id="nav-menu">
+      <a class="nav-menu-link home" href="index.html">Home</a>
+      <a class="nav-menu-link" href="game-loops.html">Game Loops</a>
+      <a class="nav-menu-link" href="player-types.html">Player Types</a>
+      <a class="nav-menu-link current" href="npc-archetypes.html">NPC Archetypes</a>
+      <a class="nav-menu-link" href="quest-types.html">Quest Types</a>
+      <a class="nav-menu-link" href="factions.html">Factions</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ LIGHTBOX MODAL ══ -->
+<div id="flow-modal" onclick="closeModal(event)">
+  <div id="flow-modal-inner">
+    <div id="flow-modal-title"></div>
+    <button id="flow-modal-close" onclick="closeModalDirect()">✕ close</button>
+    <div id="flow-modal-content"></div>
+  </div>
+</div>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <div class="hero-content">
+    <p class="eyebrow">NPC Design · Tabletop RPG</p>
+    <h1>NPC Archetypes</h1>
+    <p class="hero-sub">A three-step framework for creating NPCs that players actually invest in — built on clarity over depth.</p>
+
+    <nav class="step-nav">
+      <a class="nav-pill" href="#theory">The Problem</a>
+      <a class="nav-pill" href="#step1">Step 1: Stance</a>
+      <a class="nav-pill" href="#step2">Step 2: Archetype</a>
+      <a class="nav-pill" href="#step3">Step 3: Trope</a>
+      <a class="nav-pill" href="#reference">Quick Reference</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ══ MAIN ══ -->
+<main class="container">
+
+  <div class="video-embed">
+    <div class="video-embed-label">Source Video</div>
+    <a class="video-embed-thumb" href="https://www.youtube.com/watch?v=4T1Nu25ZZdk" target="_blank" rel="noopener" aria-label="Watch on YouTube">
+      <img src="https://img.youtube.com/vi/4T1Nu25ZZdk/hqdefault.jpg" alt="7 NPC Archetypes — Stephanie Plays Games">
+      <div class="video-embed-play">
+        <svg viewBox="0 0 68 48" xmlns="http://www.w3.org/2000/svg"><rect width="68" height="48" rx="10" fill="#FF0000"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg>
+      </div>
+    </a>
+  </div>
+
+  <!-- ── THEORY ── -->
+  <section class="section" id="theory">
+    <div class="theory-block">
+      <h2>The Clarity Problem</h2>
+      <p>When an NPC fails to land, the instinct is to add more — more backstory, more quirks, more trauma, more distinct voice. The problem is that none of those additions address what players are actually doing when they interact with an NPC. Players are subconsciously asking a single question: <strong>what can this person do in our story?</strong></p>
+      <p>If players cannot answer that question immediately, the NPC may as well not exist. Not because the NPC lacks personality, but because their <em>narrative function</em> is invisible. A brilliantly realized character who cannot be located in the party's current story is irrelevant to the party's current story.</p>
+      <p>The solution is not depth. It is <strong>clarity</strong> — giving players enough information, through the NPC's behavior and context, to understand the role this character can play. This framework provides a three-step process for achieving that clarity before the NPC ever speaks.</p>
+
+      <div class="callout warning" style="margin-top:20px;">
+        <div class="callout-label">Design Order</div>
+        <p><strong>Clarity comes before characterization.</strong> Establish narrative function first (steps 1 and 2), then add a behavioral handle (step 3). Only invest in full characterization if players demonstrate they care — not before.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STEP 1 ── -->
+  <section class="section" id="step1">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Step 01</span>
+        <span class="step-title">Set the Starting Stance: Ally or Antagonist</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Before deciding anything else about an NPC, establish their <strong>starting relationship to the party's goals</strong>. This is not a personality trait — it is a structural signal that tells players how much friction to expect when interacting with this character.</p>
+
+        <div class="stance-pair">
+          <div class="stance-card ally">
+            <div class="stance-label">✓ Ally</div>
+            <p>An NPC whose goals match, or could come to match, the goals of the party. Allies may still be complicated, withholding, or difficult to reach — but their interests are ultimately oriented in the same direction.</p>
+          </div>
+          <div class="stance-card antag">
+            <div class="stance-label">✗ Antagonist</div>
+            <p>An NPC whose goals create friction with the party — goals that clash, compete, or obstruct. Antagonist does not mean villain. A skeptical gate-keeper, a protective parent, or a rival faction member are all antagonists in this structural sense.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div class="callout-label">This Stance Can Change</div>
+          <p>Starting stance is not permanent. NPCs can shift allegiances across encounters or arcs. Establishing a clear starting stance simply gives players a reliable social map from which to navigate — and makes any shift feel earned rather than arbitrary.</p>
+        </div>
+
+        <h3>Why This Step Matters</h3>
+        <p>Stance communicates what kind of effort the party needs to invest. An ally-stance NPC can be approached directly; the party can ask for help and expect a reasonable response. An antagonist-stance NPC signals that winning this person over — or getting around them — will require something from the party first. That difference shapes how players read every line of dialogue and every reaction, even before the NPC has revealed anything substantive about themselves.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ── STEP 2 ── -->
+  <section class="section" id="step2" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Step 02</span>
+        <span class="step-title">Choose an Archetype</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>The seven NPC archetypes define the <strong>narrative role</strong> this character can play in the party's story. They are drawn from the monomyth — the hero's journey structure identified by Joseph Campbell — adapted here for tabletop play, where player choice must drive outcomes rather than a predetermined plot.</p>
+        <p>An archetype is not a personality. It identifies the <em>potential value</em> this NPC offers to the players, which is exactly the information players need to decide whether to engage.</p>
+
+        <div class="archetype-grid" id="archetype-grid">
+
+          <div class="archetype-card active" data-arch="hero" onclick="selectArchetype(this)">
+            <div class="archetype-card-name">The Hero</div>
+            <div class="archetype-card-role">A secondary protagonist on their own journey</div>
+            <span class="badge-ally">Ally</span>
+          </div>
+
+          <div class="archetype-card" data-arch="herald" onclick="selectArchetype(this)">
+            <div class="archetype-card-name">The Herald</div>
+            <div class="archetype-card-role">Signals trouble, change, or a choice ahead</div>
+            <span class="badge-either">Either</span>
+          </div>
+
+          <div class="archetype-card" data-arch="mentor" onclick="selectArchetype(this)">
+            <div class="archetype-card-name">The Mentor</div>
+            <div class="archetype-card-role">Knows more; invests in the party's success</div>
+            <span class="badge-ally">Ally</span>
+          </div>
+
+          <div class="archetype-card" data-arch="guardian" onclick="selectArchetype(this)">
+            <div class="archetype-card-name">The Threshold Guardian</div>
+            <div class="archetype-card-role">Blocks progress; forces the party to prove something</div>
+            <span class="badge-either">Either</span>
+          </div>
+
+          <div class="archetype-card" data-arch="trickster" onclick="selectArchetype(this)">
+            <div class="archetype-card-name">The Trickster</div>
+            <div class="archetype-card-role">Brings levity; resets the table's emotional energy</div>
+            <span class="badge-either">Either</span>
+          </div>
+
+          <div class="archetype-card" data-arch="shifter" onclick="selectArchetype(this)">
+            <div class="archetype-card-name">The Shape Shifter</div>
+            <div class="archetype-card-role">Sparks doubt, suspicion, and table debate</div>
+            <span class="badge-either">Either</span>
+          </div>
+
+          <div class="archetype-card" data-arch="villain" onclick="selectArchetype(this)">
+            <div class="archetype-card-name">The Villain</div>
+            <div class="archetype-card-role">Primary source of all trials and obstacles</div>
+            <span class="badge-antag">Antagonist</span>
+          </div>
+
+        </div>
+
+        <!-- ── ARCHETYPE DETAILS ── -->
+        <div id="archetype-detail-area">
+
+          <div id="arch-hero" class="archetype-detail active">
+            <div class="archetype-detail-inner">
+              <div class="archetype-detail-title">
+                The Hero <span class="badge-ally">Ally</span>
+              </div>
+              <p>The Hero archetype is an NPC on their own heroic journey — one that can intersect with the party's story. They are not competitors for the spotlight; they are characters whose arc may run parallel or adjacent to the party's, creating shared moments of momentum.</p>
+              <p>Because the players are the primary heroes of any campaign, this archetype carries significant risk. An NPC who solves problems, makes dramatic choices, or advances the story independently can slide into DMPC territory — a character the DM is playing for themselves at the expense of the players. Use this archetype deliberately and sparingly.</p>
+              <h4>Design Requirements</h4>
+              <p>The Hero NPC's goals must align closely with the party's goals, and they must never make decisions on the party's behalf. If players disengage from this NPC, the story should still function. The invitation to collaborate must be optional and clearly signaled.</p>
+              <div class="callout example">
+                <div class="callout-label">✦ Example — Curse of Strahd</div>
+                <p>Ireena Kolyana and Ismark Kolyanovich generate their own story momentum — Ireena's fate is a thread that intersects Strahd's obsession — but the party can choose to involve themselves, protect them, or walk away entirely. The campaign continues either way. Their presence raises stakes; it does not drive the party's choices.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="arch-herald" class="archetype-detail">
+            <div class="archetype-detail-inner">
+              <div class="archetype-detail-title">
+                The Herald <span class="badge-either">Either</span>
+              </div>
+              <p>The Herald signals that something is coming — trouble, opportunity, a decision that will matter. They are the primary delivery mechanism for adventure hooks. Their function is to create awareness of potential conflict without mandating a response.</p>
+              <p>In other storytelling media, the herald moment is almost guaranteed to land. In TTRPGs, players can walk past it, misinterpret it, or choose to ignore it entirely. This is a feature, not a failure. A Herald that players can engage with, dismiss, or misread is doing exactly what the archetype is supposed to do.</p>
+              <h4>Design Requirements</h4>
+              <p>The Herald does not need to speak the trouble aloud. Environmental cues, strange behavior, an object that doesn't belong — any signal that invites player interpretation can serve the Herald function. The key is that the signal opens a door without forcing the party through it.</p>
+              <div class="callout example">
+                <div class="callout-label">✦ Example — Curse of Strahd</div>
+                <p>The group of villagers in the Barovia stockades, wearing donkey masks when the players first arrive. They say nothing. Their presence draws attention to the fact that something is wrong in this place — a lead the players can pursue, ignore, or completely misread about what kind of wrong it is.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="arch-mentor" class="archetype-detail">
+            <div class="archetype-detail-inner">
+              <div class="archetype-detail-title">
+                The Mentor <span class="badge-ally">Ally</span>
+              </div>
+              <p>The Mentor is an NPC who knows more than the party and is willing to help them grow. This does not require an old wizard archetype — any NPC with relevant expertise and a willingness to share it can fill this role. What distinguishes the Mentor from a patron is the absence of transaction: the Mentor invests in the party because they see potential, not because they expect repayment.</p>
+              <h4>Three Modes of Mentorship</h4>
+              <p><strong>Teach</strong> — share warnings, tactical knowledge, lore, or historical context that helps the party prepare for what they're walking into.</p>
+              <p><strong>Give gifts</strong> — provide material support (equipment, supplies, safe shelter, healing) that reflects belief in the party's mission rather than a trade.</p>
+              <p><strong>Guide</strong> — help the party understand what is at stake, keep them grounded when chaos pulls them off course, or offer moral orientation when choices become genuinely difficult.</p>
+              <div class="callout example">
+                <div class="callout-label">✦ Example — Curse of Strahd</div>
+                <p>Rudolph van Richten, when he appears, tends to serve all three modes — teaching through his expertise on Strahd and the nature of vampirism, giving through his knowledge and connections, and guiding through his long experience with exactly the kind of darkness the party is navigating. His tenure as mentor is contingent on the campaign's events, which is itself a meaningful design choice.</p>
+              </div>
+              <div class="callout warning" style="margin-top:16px;">
+                <div class="callout-label">Watch For</div>
+                <p>Mentors are almost exclusively allies, which makes them high-value targets for a villain seeking to apply pressure to the party. Threatening a mentor tends to produce strong player investment precisely because the relationship has been established as genuine rather than transactional.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="arch-guardian" class="archetype-detail">
+            <div class="archetype-detail-inner">
+              <div class="archetype-detail-title">
+                The Threshold Guardian <span class="badge-either">Either</span>
+              </div>
+              <p>The Threshold Guardian is an NPC who stands between the party and something they want. They represent a test that must be navigated before the party can access the real challenge — the major confrontation, the key resource, the critical piece of information.</p>
+              <p>The key quality of this archetype is <em>obstruction</em>, not goal alignment. A Guardian who is invested in the party's eventual success can still be a genuine obstacle. A guardian may require the party to demonstrate readiness, earn trust, or prove something about their character before stepping aside.</p>
+              <h4>What the Guardian Provides</h4>
+              <p>Guardian encounters give players a chance to practice and demonstrate the skills — deception, diplomacy, stealth, persuasion, tactical thinking, or teamwork — that will matter at higher stakes later. A well-designed Guardian encounter teaches the party something about the tools they have, before those tools are needed urgently.</p>
+              <div class="callout example">
+                <div class="callout-label">✦ Example — The Reluctant Convert</div>
+                <p>A rival faction NPC assigned to guard the party's kidnapped mentor. He begins as an antagonist — genuinely opposed to the party's goals — but after being captured and subjected to a charm person, he becomes an unlikely, surprisingly beloved helper and eventually a gateway into the main adventure. The obstruction was real; its resolution opened unexpected story space.</p>
+              </div>
+              <div class="callout example">
+                <div class="callout-label">✦ Example — The Ally Guardian</div>
+                <p>A seasoned warrior who guards a sacred weapon. She will not hand it over simply because the party asks — they must demonstrate they are ready to wield it responsibly. Her obstruction is an act of stewardship, not opposition. An ally in every structural sense, but a Guardian by function.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="arch-trickster" class="archetype-detail">
+            <div class="archetype-detail-inner">
+              <div class="archetype-detail-title">
+                The Trickster <span class="badge-either">Either</span>
+              </div>
+              <p>The Trickster — sometimes called the Comic — introduces levity, surprise, and strangeness into the story. Their function is to break tension, interrupt sustained emotional weight, and give the table permission to laugh when a session has been running heavy.</p>
+              <p>Many DMs create this archetype accidentally. The NPC panic-named on the spot who happens to have a ridiculous hobby and an odd voice ends up becoming a player favorite — not because the DM prepared them carefully, but because the table needed exactly what that character delivered in that moment.</p>
+              <h4>When to Deploy</h4>
+              <p>The Trickster tends to be most valuable after sustained darkness or pressure. A session or arc that has been bleak, morally complicated, or mechanically stressful can benefit from a character who operates outside the campaign's dominant register — someone clumsy, chaotically passionate, or simply funny. Levity can restore the energy players need to re-engage with serious material.</p>
+              <div class="callout warning">
+                <div class="callout-label">Context Matters</div>
+                <p>Comic relief that arrives at the wrong moment can undercut emotional scenes the players have been building toward. The Trickster works when players need a reset — not as a default mode for every NPC interaction.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="arch-shifter" class="archetype-detail">
+            <div class="archetype-detail-inner">
+              <div class="archetype-detail-title">
+                The Shape Shifter <span class="badge-either">Either</span>
+              </div>
+              <p>The Shape Shifter is an NPC whose loyalties, motives, or truthfulness the party cannot confidently assess. They generate the heated table debates that make shared storytelling feel alive — is this person trustworthy? Are they being played? The Shape Shifter produces that kind of productive uncertainty.</p>
+              <p>This archetype tends to appear in conjunction with plot twists, red herrings, hidden loyalties, and possible betrayals. They may also turn out to be an unexpected ally. The uncertainty is the point.</p>
+              <h4>The Essential Requirement</h4>
+              <p>Shape Shifters only land well when players have enough information to make informed choices. If the party has no access to clues — odd behaviors, contradictions, private moments that don't add up — then any revelation feels like something that happened <em>to</em> them rather than something they were navigating. The goal is not to surprise the players with a twist. The goal is to create a situation where their trust or mistrust becomes <em>their</em> active choice.</p>
+              <h4>Planting the Signals</h4>
+              <p>Effective Shape Shifter signals tend to be small and individually ambiguous: a private argument the party overhears, a detail in a letter that doesn't quite fit, a moment where the NPC seems afraid to speak, or a story told twice with slightly different particulars. None of these need to confirm anything. They simply invite interpretation — and give players something to act on before a revelation forces their hand.</p>
+              <div class="callout warning">
+                <div class="callout-label">Avoid the Trap</div>
+                <p>Do not optimize for the reveal. A twist that players did not see coming and could not have deduced tends to feel arbitrary. A twist that players suspected, debated, and ultimately got right — or wrong in an interesting way — tends to feel collaborative and satisfying.</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="arch-villain" class="archetype-detail">
+            <div class="archetype-detail-inner">
+              <div class="archetype-detail-title">
+                The Villain <span class="badge-antag">Antagonist</span>
+              </div>
+              <p>The Villain is the primary source of the trials the party is navigating — the NPC whose goals, if realized, represent the failure state the party is working to prevent. Most obstacles and pressures in the campaign can trace back to this character's actions or ambitions.</p>
+              <p>This is the one archetype that tends to sit reliably in the antagonist category from the start, though the nature of their antagonism and even their identity may remain uncertain for much of the campaign.</p>
+              <h4>Start Loose</h4>
+              <p>For player-driven campaigns, a villain designed in full before the campaign begins may not connect with the specific players at the table. A more durable approach is to solidify only two things at the start: <strong>the villain's core goal</strong> and <strong>what that goal threatens that the players care about</strong>. Everything else — their specific identity, backstory, methods, and final form — can remain flexible.</p>
+              <p>Starting with a few candidates for who the villain might be, and watching which one the players are reacting most strongly to, allows the campaign to produce a villain who feels personal rather than assigned. In TTRPGs, the truth of who the villain is does not have to be decided before the players help reveal it.</p>
+              <div class="callout example">
+                <div class="callout-label">✦ Starting Prompts</div>
+                <p><strong>The party's village has vanished from the material plane.</strong> Who caused it? Three people in town could plausibly have had the power and motive. Watch who the players are most suspicious of.</p>
+                <p><strong>A powerful artifact is rumored to grant impossible magic.</strong> Who in this city is willing to do anything to acquire it? Keep two or three candidates alive until the players' behavior begins to reveal the answer.</p>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /archetype-detail-area -->
+      </div>
+    </details>
+  </section>
+
+  <!-- ── STEP 3 ── -->
+  <section class="section" id="step3" style="margin-top:-36px;">
+    <details class="step-card" open>
+      <summary class="step-header">
+        <span class="step-number">Step 03</span>
+        <span class="step-title">Add a Quick Trope</span>
+        <span class="step-chevron">▶</span>
+      </summary>
+      <div class="step-body">
+        <p>Once stance and archetype are set, add a <strong>single trope</strong> — a recognizable character type borrowed from fiction, film, or folklore — to serve as a behavioral handle. The trope gives the DM something to reach for during roleplay: an instant set of default choices, emotional registers, and reactions, without requiring a full character document.</p>
+        <p>The goal is not to produce a cliché. The goal is to give the brain a quick handle it can lean into, subvert, or play against the moment improvisation is required.</p>
+
+        <div class="callout">
+          <div class="callout-label">What a Trope Provides</div>
+          <p>A trope supplies <strong>tone, behavior, and emotional framing</strong> — enough to make an NPC feel distinct in play without burning prep time. It is a starting point, not a constraint. If the NPC becomes important enough to warrant deeper development, the trope becomes the foundation that more detailed characterization builds on.</p>
+        </div>
+
+        <h3>Example: Trope + Archetype in Practice</h3>
+        <p>Take the <strong>Innocent</strong> — a character type drawn from horror: young, gentle, or otherwise unassuming. They often occupy roles as an unlikely witness, a sacrificial figure, or a surprising threat when the trope is subverted.</p>
+        <p>Combine that with the <strong>Threshold Guardian</strong> archetype, set to <em>ally</em> stance:</p>
+
+        <div class="callout example">
+          <div class="callout-label">✦ Ally Version</div>
+          <p>A frightened child who knows something about the creature threatening the town — but will not speak about it until they feel genuinely safe and protected. The party must earn their trust before the information flows. The Guardian archetype provides the obstruction; the Innocent trope tells you exactly how to play it.</p>
+        </div>
+
+        <p>Shift to <em>antagonist</em> stance and the same combination produces something very different:</p>
+
+        <div class="callout example">
+          <div class="callout-label">✦ Antagonist Version</div>
+          <p>A child who is actively feeding misleading information to the party — not from malice, but because they are charmed, cursed, or simply more loyal to the creature than to any newcomers who claim to want to help. Or perhaps the creature is the only companionship they have ever known, and protection is the real motive. The obstruction is real; the emotional texture is complex.</p>
+        </div>
+
+        <h3>A Starting Set of Tropes</h3>
+        <p>Any recognizable character type from fiction works. These are a starting set organized by emotional register:</p>
+
+        <div class="trope-grid">
+          <div class="trope-card">
+            <div class="trope-name">The Innocent</div>
+            <div class="trope-desc">Young, gentle, or unassuming — often a witness or unlikely source of truth.</div>
+          </div>
+          <div class="trope-card">
+            <div class="trope-name">The Grizzled Veteran</div>
+            <div class="trope-desc">Has seen too much, trusts slowly, but their experience is invaluable if earned.</div>
+          </div>
+          <div class="trope-card">
+            <div class="trope-name">The True Believer</div>
+            <div class="trope-desc">Fanatically committed to a cause — ally if aligned, immovable wall if not.</div>
+          </div>
+          <div class="trope-card">
+            <div class="trope-name">The Smooth Operator</div>
+            <div class="trope-desc">Always composed, always working an angle, rarely showing their full hand.</div>
+          </div>
+          <div class="trope-card">
+            <div class="trope-name">The Reluctant Expert</div>
+            <div class="trope-desc">Knows exactly what the party needs to know but wants nothing to do with the situation.</div>
+          </div>
+          <div class="trope-card">
+            <div class="trope-name">The Broken Hero</div>
+            <div class="trope-desc">Was once capable; now diminished by failure, grief, or circumstance.</div>
+          </div>
+          <div class="trope-card">
+            <div class="trope-name">The Overprotective Guardian</div>
+            <div class="trope-desc">Cares deeply about someone or something — and sees the party as a threat until proven otherwise.</div>
+          </div>
+          <div class="trope-card">
+            <div class="trope-name">The Wildcard</div>
+            <div class="trope-desc">Unpredictable in method, but their underlying goal is consistent once the party figures it out.</div>
+          </div>
+          <div class="trope-card">
+            <div class="trope-name">The Ambitious Climber</div>
+            <div class="trope-desc">Wants power, status, or recognition — the party is a means to that end, at least for now.</div>
+          </div>
+        </div>
+
+        <div class="callout warning" style="margin-top:8px;">
+          <div class="callout-label">When to Go Deeper</div>
+          <p>If players begin investing in an NPC — asking questions about them between sessions, seeking them out, making decisions based on how the NPC might react — that is the signal to develop them further. Not before. Prep that precedes player interest tends not to pay off at the table.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ── QUICK REFERENCE ── -->
+  <section class="section" id="reference" style="margin-top:-12px;">
+    <div class="theory-block">
+      <h2>Quick Reference</h2>
+      <p style="font-size:15px;color:var(--mist);margin-bottom:20px;">Seven archetypes, their narrative function, typical stance, and a design note for each.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Archetype</th>
+              <th>Narrative Function</th>
+              <th>Stance</th>
+              <th>Design Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>The Hero</strong></td>
+              <td>Secondary protagonist whose journey can intersect the party's</td>
+              <td><span class="badge-ally">Ally</span></td>
+              <td>Use sparingly. NPC must never make decisions for the party.</td>
+            </tr>
+            <tr>
+              <td><strong>The Herald</strong></td>
+              <td>Signals trouble, change, or a choice approaching</td>
+              <td><span class="badge-either">Either</span></td>
+              <td>Players must be able to ignore, pursue, or misread the signal.</td>
+            </tr>
+            <tr>
+              <td><strong>The Mentor</strong></td>
+              <td>Shares knowledge, support, or guidance non-transactionally</td>
+              <td><span class="badge-ally">Ally</span></td>
+              <td>Not a patron. Invests in the party without expecting repayment.</td>
+            </tr>
+            <tr>
+              <td><strong>The Threshold Guardian</strong></td>
+              <td>Blocks progress; tests the party before the real challenge</td>
+              <td><span class="badge-either">Either</span></td>
+              <td>Obstruction is required; hostile stance is not.</td>
+            </tr>
+            <tr>
+              <td><strong>The Trickster</strong></td>
+              <td>Introduces levity and breaks sustained emotional tension</td>
+              <td><span class="badge-either">Either</span></td>
+              <td>Most effective when the session has been running heavy.</td>
+            </tr>
+            <tr>
+              <td><strong>The Shape Shifter</strong></td>
+              <td>Creates productive uncertainty about motives and loyalties</td>
+              <td><span class="badge-either">Either</span></td>
+              <td>Requires planted clues. Optimize for player agency, not the reveal.</td>
+            </tr>
+            <tr>
+              <td><strong>The Villain</strong></td>
+              <td>Primary source of the campaign's trials and obstacles</td>
+              <td><span class="badge-antag">Antagonist</span></td>
+              <td>Start with core goal and what it threatens. Keep identity flexible.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="attribution container">
+  <p>Framework sourced from <a href="https://www.youtube.com/watch?v=4T1Nu25ZZdk" target="_blank" rel="noopener">7 NPC Archetypes (And a 3-Step Formula)</a> by <a href="https://www.youtube.com/@StephaniePlaysGames" target="_blank" rel="noopener">Stephanie Plays Games</a>.</p>
+  <p style="margin-top:4px;">Archetype structure adapted from the Hero's Journey (Joseph Campbell). No methodology original to this site.</p>
+</footer>
+
+<script>
+  function toggleNav() {
+    const dd = document.getElementById('site-nav-dropdown');
+    const open = dd.classList.toggle('open');
+    document.getElementById('nav-trigger').setAttribute('aria-expanded', open);
+  }
+  document.addEventListener('click', function(e) {
+    const dd = document.getElementById('site-nav-dropdown');
+    if (dd && !dd.contains(e.target)) {
+      dd.classList.remove('open');
+      document.getElementById('nav-trigger').setAttribute('aria-expanded', 'false');
+    }
+  });
+  function selectArchetype(card) {
+    document.querySelectorAll('.archetype-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.archetype-detail').forEach(d => d.classList.remove('active'));
+    card.classList.add('active');
+    const arch = card.dataset.arch;
+    const detail = document.getElementById('arch-' + arch);
+    if (detail) detail.classList.add('active');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('flow-modal')) {
+      document.getElementById('flow-modal').classList.remove('open');
+    }
+  }
+  function closeModalDirect() {
+    document.getElementById('flow-modal').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') document.getElementById('flow-modal').classList.remove('open');
+  });
+</script>
+
+</body>
+</html>
