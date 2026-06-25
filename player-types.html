@@ -404,6 +404,58 @@
     font-size: 10px;
   }
 
+  /* ── VIDEO EMBED ── */
+  .video-embed {
+    margin: 48px 0 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--deep);
+  }
+  .video-embed-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mist);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .video-embed-thumb {
+    position: relative;
+    display: block;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    text-decoration: none;
+  }
+  .video-embed-thumb img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.2s;
+  }
+  .video-embed-thumb:hover img { opacity: 0.8; }
+  .video-embed-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .video-embed-play svg {
+    width: 72px;
+    height: 72px;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7));
+    transition: transform 0.2s;
+  }
+  .video-embed-thumb:hover .video-embed-play svg { transform: scale(1.1); }
+
   /* ── ATTRIBUTION ── */
   .attribution {
     text-align: center;
@@ -520,6 +572,16 @@
 
 <!-- ══ MAIN ══ -->
 <main class="container">
+
+  <div class="video-embed">
+    <div class="video-embed-label">Source Video</div>
+    <a class="video-embed-thumb" href="https://www.youtube.com/watch?v=VoGVEUU8PRo" target="_blank" rel="noopener" aria-label="Watch on YouTube">
+      <img src="https://img.youtube.com/vi/VoGVEUU8PRo/hqdefault.jpg" alt="What do you ACTUALLY want from a D&amp;D game? — Ginny Di">
+      <div class="video-embed-play">
+        <svg viewBox="0 0 68 48" xmlns="http://www.w3.org/2000/svg"><rect width="68" height="48" rx="10" fill="#FF0000"/><polygon points="27,14 27,34 46,24" fill="#fff"/></svg>
+      </div>
+    </a>
+  </div>
 
   <!-- INTRODUCTION -->
   <section class="section" id="intro">
